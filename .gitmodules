@@ -1,9 +1,9 @@
-[submodule "external/glmlib"]
-	path = external/glmlib
-	url = https://github.com/Groovounet/glm.git
 [submodule "external/SDL"]
 	path = external/SDL
 	url = https://github.com/libsdl-org/SDL.git
 [submodule "external/imgui"]
 	path = external/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "external/glm"]
+	path = external/glm
+	url = https://github.com/g-truc/glm.git
