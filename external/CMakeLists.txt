@@ -17,8 +17,18 @@ add_subdirectory(SDL)
 
 target_link_libraries(${PROJECT_NAME} 
     PUBLIC SDL3::SDL3
-    PUBLIC opengl32
 )
+
+if(PLATFORM_WIN32)
+target_link_libraries(${PROJECT_NAME}  PRIVATE opengl32)
+elseif(PLATFORM_LINUX)
+elseif(PLATFORM_MACOS)
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(${PROJECT_NAME}  PRIVATE ${OPENGL_LIBRARY})
+elseif(PLATFORM_ANDROID)
+else()
+    message(FATAL_ERROR "Unsupported platform")
+endif()
 
 target_include_directories(${PROJECT_NAME} 
     PUBLIC "${EXTERNAL_LIB_PATH}/glad/include"

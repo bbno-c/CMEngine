@@ -21,6 +21,6 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} 
     PUBLIC "${EXTERNALS_PATH}/SDL/include"
-    PUBLIC "${EXTERNALS_PATH}/glmlib"
+    PUBLIC "${EXTERNALS_PATH}/glm"
     PUBLIC "${ENGINE_ROOT}/utility"
 )
