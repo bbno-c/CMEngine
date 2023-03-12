@@ -1,3 +1,4 @@
+﻿#include "common.h"
 #include "Utils.h"
 #include <SDL3/SDL.h>
 #include <iostream>
@@ -7,12 +8,26 @@
 void CUtils::InitOnceSDL2()
 {
 	static bool didInit = false;
-
 	if (!didInit)
 	{
-		if (0 != SDL_Init(SDL_INIT_EVERYTHING))
+		const int status = SDL_Init(SDL_INIT_EVERYTHING);
+		if (status != 0)
 		{
-			std::cerr << "SDL2 initialization failed: " << SDL_GetError() << std::endl;
+			ValidateSDL2Errors();
+		}
+	}
+}
+
+void CUtils::InitOnceGLEW()
+{
+	static bool didInit = false;
+	if (!didInit)
+	{
+		glewExperimental = GL_TRUE;
+		GLenum status = glewInit();
+		if (status != GLEW_OK)
+		{
+			std::cerr << "GLEW initialization failed: " << glewGetErrorString(status) << std::endl;
 			std::abort();
 		}
 	}
@@ -24,6 +39,41 @@ void CUtils::ValidateSDL2Errors()
 	if (!message.empty())
 	{
 		std::cerr << "SDL2 error: " << message << std::endl;
+		std::abort();
+	}
+}
+
+void CUtils::ValidateOpenGLErrors()
+{
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::string message;
+		switch (error)
+		{
+		case GL_INVALID_ENUM:
+			message = "invalid enum passed to GL function (GL_INVALID_ENUM)";
+			break;
+		case GL_INVALID_VALUE:
+			message = "invalid parameter passed to GL function (GL_INVALID_VALUE)";
+			break;
+		case GL_INVALID_OPERATION:
+			message = "cannot execute some of GL functions in current state (GL_INVALID_OPERATION)";
+			break;
+		case GL_STACK_OVERFLOW:
+			message = "matrix stack overflow occured inside GL (GL_STACK_OVERFLOW)";
+			break;
+		case GL_STACK_UNDERFLOW:
+			message = "matrix stack underflow occured inside GL (GL_STACK_UNDERFLOW)";
+			break;
+		case GL_OUT_OF_MEMORY:
+			message = "no enough memory to execute GL function (GL_OUT_OF_MEMORY)";
+			break;
+		default:
+			message = "error in some GL extension (framebuffers, shaders, etc)";
+			break;
+		}
+		std::cerr << "OpenGL error: " << message << std::endl;
 		std::abort();
 	}
 }

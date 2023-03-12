@@ -9,10 +9,12 @@ add_subdirectory(../external CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 
 file(GLOB_RECURSE ENGINE_UTILITY_SOURCE "utility/*.cpp" "utility/*.c" "utility/*.cc" "utility/*.h" "utility/*.hpp")
 file(GLOB_RECURSE ENGINE_SYSTEM_SOURCE "system/*.cpp" "system/*.c" "system/*.cc" "system/*.h" "system/*.hpp")
+file(GLOB ENGINE_SOURCE "*.cpp" "*.c" "*.cc" "*.h" "*.hpp")
 
 add_library(${PROJECT_NAME} STATIC 
 ${ENGINE_UTILITY_SOURCE}
 ${ENGINE_SYSTEM_SOURCE}
+${ENGINE_SOURCE}
 )
 
 target_link_libraries(${PROJECT_NAME} 
@@ -21,6 +23,10 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} 
     PUBLIC "${EXTERNALS_PATH}/SDL/include"
+    PUBLIC "${EXTERNALS_PATH}/glew/include/GL"
     PUBLIC "${EXTERNALS_PATH}/glm"
     PUBLIC "${ENGINE_ROOT}/utility"
+    PUBLIC "${ENGINE_ROOT}"
 )
+
+target_precompile_headers( ${PROJECT_NAME} PUBLIC common.h)

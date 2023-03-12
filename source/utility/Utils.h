@@ -1,4 +1,29 @@
-#include <chrono>
+﻿#pragma once
+#include <SDL3/SDL_video.h>
+
+namespace detail
+{
+struct SDLWindowDeleter
+{
+	void operator()(SDL_Window *ptr)
+	{
+		SDL_DestroyWindow(ptr);
+	}
+};
+struct SDLGLContextDeleter
+{
+	void operator()(SDL_GLContext ptr)
+	{
+		SDL_GL_DeleteContext(ptr);
+	}
+};
+}
+
+// Используем unique_ptr с явно заданным функтором удаления вместо delete.
+using SDLWindowPtr = std::unique_ptr<SDL_Window, detail::SDLWindowDeleter>;
+
+// Используем unique_ptr с явно заданным функтором удаления вместо delete.
+using SDLGLContextPtr = std::unique_ptr<void, detail::SDLGLContextDeleter>;
 
 class CUtils
 {
@@ -6,7 +31,9 @@ public:
 	CUtils() = delete;
 
 	static void InitOnceSDL2();
+	static void InitOnceGLEW();
 	static void ValidateSDL2Errors();
+	static void ValidateOpenGLErrors();
 };
 
 class CChronometer
