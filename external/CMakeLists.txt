@@ -1,20 +1,22 @@
 cmake_minimum_required(VERSION 3.23.1)
 
+if(${CMAKE_VERSION} VERSION_LESS 3.25)
+    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+else()
+    cmake_policy(VERSION 3.25)
+endif()
+
 project(external_lib)
 
 set(EXTERNAL_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-
-find_package(OpenGL REQUIRED)
 
 add_library(${PROJECT_NAME} 
     external.cpp
 )
 
-set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(SDL_STATIC ON)
 set(SDL_SHARED OFF)
 add_subdirectory(SDL)
-
 target_link_libraries(${PROJECT_NAME} 
     PUBLIC SDL3::SDL3
 )
@@ -24,13 +26,11 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC glew-static
 )
 
-if(PLATFORM_WIN32)
-target_link_libraries(${PROJECT_NAME} PUBLIC opengl32)
-elseif(PLATFORM_LINUX)
-elseif(PLATFORM_MACOS)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(FATAL_ERROR "Unsupported platform")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_link_libraries(${PROJECT_NAME} PUBLIC opengl32)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_package(OpenGL REQUIRED)
     target_link_libraries(${PROJECT_NAME}  PUBLIC ${OPENGL_LIBRARY})
-elseif(PLATFORM_ANDROID)
-else()
-    message(FATAL_ERROR "Unsupported platform")
 endif()
