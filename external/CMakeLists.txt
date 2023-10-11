@@ -27,10 +27,20 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    message(FATAL_ERROR "Unsupported platform")
+    message(WARNING "Linux platform is currently not supported.")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_link_libraries(${PROJECT_NAME} PUBLIC opengl32)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    # Find OpenGL package
     find_package(OpenGL REQUIRED)
-    target_link_libraries(${PROJECT_NAME}  PUBLIC ${OPENGL_LIBRARY})
+
+    # Include OpenGL and GLU headers
+    include_directories(${OPENGL_INCLUDE_DIR})
+
+    # Link OpenGL and GLU libraries
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARIES} glu32)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    # Find OpenGL package
+    find_package(OpenGL REQUIRED)
+
+    # Link OpenGL and GLU libraries
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARY} GLU)
 endif()
