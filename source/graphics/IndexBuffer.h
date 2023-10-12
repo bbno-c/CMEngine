@@ -9,10 +9,6 @@ namespace CMEngine {
 
 		void Bind() const;
 		void Unbind() const;
-
-		IndexBuffer(const IndexBuffer& other) = delete;
-		IndexBuffer& operator=(const IndexBuffer& other) = delete;
-
 		inline uint32_t GetCount() const { return m_Count; }
 
 	private:

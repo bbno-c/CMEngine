@@ -2,6 +2,7 @@
 
 namespace CMEngine {
 
+	// TODO add uniform location caching
 	class Shader {
 	public:
 		Shader(std::string vertex_source_path, std::string fragment_source_path);

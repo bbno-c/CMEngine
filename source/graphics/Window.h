@@ -10,7 +10,6 @@ namespace CMEngine {
         Window(int width, int height, const char* title);
         ~Window();
 
-        void Clear() const;
         void Update();
         bool IsClosed() const;
 

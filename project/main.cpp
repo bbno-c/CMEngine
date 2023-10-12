@@ -3,7 +3,9 @@
 #include <graphics/Window.h>
 #include <graphics/Shader.h>
 #include <graphics/Renderer.h>
+#include <graphics/VertexArray.h>
 #include <graphics/VertexBuffer.h>
+#include <graphics/VertexBufferLayout.h>
 #include <graphics/IndexBuffer.h>
 
 #include <utility/Base.h>
@@ -40,42 +42,33 @@ int main(int argc, char* argv[]) {
 		2, 5, 6   // bottom face
 	};
 
-	std::shared_ptr<Shader> shader = std::make_shared<Shader>("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+	Shader shader ("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+
+	VertexArray va;
 	VertexBuffer vb (vertices, sizeof(vertices));
-
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
+	VertexBufferLayout layout;
+	layout.Push<float>(3);
+	va.AddBuffer(vb, layout);
 	uint32_t count = sizeof(indices) / sizeof(uint32_t);
 	IndexBuffer ib(indices, count);
 
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	Renderer renderer;
 
 	float angleInDegrees = 0.0f; // Initial rotation angle.
 	float rotationSpeed = 20.0f; // Rotation speed in degrees per second.
-
 	Uint32 lastTime = SDL_GetTicks(); // Outside the loop, get the initial time.
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	while (!window.IsClosed()) {
-		window.Clear();
+		renderer.Clear();
 
 		Uint32 currentTime = SDL_GetTicks();
 		float deltaTime = (currentTime - lastTime) / 1000.0f; // Convert milliseconds to seconds.
 		lastTime = currentTime;
 
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
-		vb.Bind();
 		ib.Bind();
-
-		shader->Bind();
+		shader.Bind();
 
 		// Model Matrix
 		glm::mat4 model = glm::mat4(1.0f);  // Initialize with identity matrix
@@ -104,13 +97,11 @@ int main(int argc, char* argv[]) {
 		float farClip = 100.0f;
 		glm::mat4 projection = glm::perspective(glm::radians(fov), aspect, nearClip, farClip);
 
-		shader->UploadUniformMat4("model", model);
-		shader->UploadUniformMat4("view", view);
-		shader->UploadUniformMat4("projection", projection);
+		shader.UploadUniformMat4("model", model);
+		shader.UploadUniformMat4("view", view);
+		shader.UploadUniformMat4("projection", projection);
 
-		glBindVertexArray(VAO);
-		GL_CALL(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
-		glBindVertexArray(0);
+		renderer.Draw(va, ib, shader);
 
 		window.Update();
 	}
