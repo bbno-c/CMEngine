@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include <graphics/Window.h>
 #include <graphics/Shader.h>
@@ -7,6 +7,7 @@
 #include <graphics/VertexBuffer.h>
 #include <graphics/VertexBufferLayout.h>
 #include <graphics/IndexBuffer.h>
+#include <graphics/Texture.h>
 
 #include <utility/Base.h>
 
@@ -14,51 +15,75 @@ int main(int argc, char* argv[]) {
 
 	using namespace CMEngine;
 
+	VirtualFileSystem::GetInstance().Init("Assets/");
+
 	Window window(800, 600, "My Game Engine");
 
+	const char* glVersion = (const char*)glGetString(GL_VERSION);
+	if (glVersion) {
+		printf("OpenGL Version: %s\n", glVersion);
+	}
+	else {
+		// Handle error
+	}
+
 	float vertices[] = {
-	 0.5f,  0.5f, -0.5f,  // front top right
-	 0.5f, -0.5f, -0.5f,  // front bottom right
-	-0.5f, -0.5f, -0.5f,  // front bottom left
-	-0.5f,  0.5f, -0.5f,  // front top left
-	 0.5f,  0.5f,  0.5f,  // back top right
-	 0.5f, -0.5f,  0.5f,  // back bottom right
-	-0.5f, -0.5f,  0.5f,  // back bottom left
-	-0.5f,  0.5f,  0.5f   // back top left
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f,  1.0f, 1.0f 
 	};
 
 	unsigned int indices[] = {
-		0, 1, 3,  // front face
-		1, 2, 3,  // front face
-		4, 5, 7,  // back face
-		5, 6, 7,  // back face
-		0, 1, 4,  // right face
-		1, 4, 5,  // right face
-		2, 3, 6,  // left face
-		3, 6, 7,  // left face
-		0, 3, 4,  // top face
-		3, 4, 7,  // top face
-		1, 2, 5,  // bottom face
-		2, 5, 6   // bottom face
+		0, 1, 3,
+		1, 2, 3,
+		4, 5, 7,
+		5, 6, 7,
+		0, 1, 4,
+		1, 4, 5,
+		2, 3, 6,
+		3, 6, 7,
+		0, 3, 4,
+		3, 4, 7,
+		1, 2, 5,
+		2, 5, 6 
 	};
 
-	Shader shader ("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+	Shader shader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
 
 	VertexArray va;
-	VertexBuffer vb (vertices, sizeof(vertices));
+	va.Bind();
+
+	VertexBuffer vb(vertices, sizeof(vertices));
 	VertexBufferLayout layout;
 	layout.Push<float>(3);
-	va.AddBuffer(vb, layout);
-	uint32_t count = sizeof(indices) / sizeof(uint32_t);
-	IndexBuffer ib(indices, count);
+	layout.Push<float>(2);
 
-	Renderer renderer;
+	va.AddBuffer(vb, layout);
+
+	IndexBuffer ib(indices, sizeof(indices) / sizeof(uint32_t));
+
+	Texture texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/moon.png"));
+	texture.Bind();
+	shader.UploadUniformInt("u_Texture", 0);
+
+	va.Unbind();
+	vb.Unbind();
+	ib.Unbind();
+	shader.Unbind();
 
 	float angleInDegrees = 0.0f; // Initial rotation angle.
 	float rotationSpeed = 20.0f; // Rotation speed in degrees per second.
 	Uint32 lastTime = SDL_GetTicks(); // Outside the loop, get the initial time.
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnable(GL_DEPTH_TEST);
+
+	Renderer renderer;
 
 	while (!window.IsClosed()) {
 		renderer.Clear();
@@ -67,7 +92,6 @@ int main(int argc, char* argv[]) {
 		float deltaTime = (currentTime - lastTime) / 1000.0f; // Convert milliseconds to seconds.
 		lastTime = currentTime;
 
-		ib.Bind();
 		shader.Bind();
 
 		// Model Matrix

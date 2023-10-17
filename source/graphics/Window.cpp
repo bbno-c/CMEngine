@@ -6,9 +6,13 @@ namespace CMEngine {
         : m_isClosed(false)
     {
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-            // Initialization failed
+            // SDL Initialization failed
             throw std::runtime_error("Failed to initialize SDL");
         }
+
+        // Set the desired OpenGL version
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 4);
 
         m_window = SDL_CreateWindow(
             title,

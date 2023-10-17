@@ -44,3 +44,5 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     # Link OpenGL and GLU libraries
     target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARY} GLU)
 endif()
+
+#add_subdirectory(stb)

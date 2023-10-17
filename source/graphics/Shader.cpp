@@ -10,7 +10,7 @@ namespace CMEngine {
 		{
 			Timer t;
 			m_ID = createShaderProgram(vertex, fragment);
-			std::cout << "Shader creation took " << t.ElapsedMillis() << " ms";
+			std::cout << "Shader creation took " << t.ElapsedMillis() << " ms" << std::endl;
 		}
 	}
 	Shader::~Shader() {
@@ -33,8 +33,7 @@ namespace CMEngine {
 		shader_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
 		try {
-			VirtualFileSystem& vfs = VirtualFileSystem::GetInstance("Assets/");
-			if (!vfs.LoadFile(file_path, code)) {
+			if (!VirtualFileSystem::GetInstance().LoadFile(file_path, code)) {
 				throw std::runtime_error("vfs.LoadFile");
 			}
 		}

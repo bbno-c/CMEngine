@@ -2,8 +2,8 @@
 
 class VirtualFileSystem {
 public:
-    static VirtualFileSystem& GetInstance(const std::string& rootDirectory) {
-        static VirtualFileSystem instance(rootDirectory);
+    static VirtualFileSystem& GetInstance() {
+        static VirtualFileSystem instance;
         return instance;
     }
 
@@ -26,10 +26,17 @@ public:
         return true;
     }
 
-private:
-    VirtualFileSystem(const std::string& rootDirectory) {
+    std::string GetVFSFilePath(const std::string& filePath) {
+        return rootDirectory_ + filePath;
+    }
+
+    void Init(const std::string& rootDirectory) {
         std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
-        rootDirectory_ = parentDir +"/"+ rootDirectory;
+        rootDirectory_ = parentDir + "/" + rootDirectory;
+    }
+
+private:
+    VirtualFileSystem() : rootDirectory_("") {
     }
 
     std::string rootDirectory_;
