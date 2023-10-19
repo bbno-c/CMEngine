@@ -11,13 +11,17 @@
 
 #include <utility/Base.h>
 
+constexpr const uint16_t ScreenWidth = 800;
+constexpr const uint16_t ScreenHeight = 600;
+
+
 int main(int argc, char* argv[]) {
 
 	using namespace CMEngine;
 
 	VirtualFileSystem::GetInstance().Init("Assets/");
 
-	Window window(800, 600, "My Game Engine");
+	Window window(ScreenWidth, ScreenHeight, "My Game Engine");
 
 	const char* glVersion = (const char*)glGetString(GL_VERSION);
 	if (glVersion) {
@@ -67,7 +71,7 @@ int main(int argc, char* argv[]) {
 
 	IndexBuffer ib(indices, sizeof(indices) / sizeof(uint32_t));
 
-	Texture texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/moon.png"));
+	Texture texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/tr.png"));
 	texture.Bind();
 	shader.UploadUniformInt("u_Texture", 0);
 
@@ -116,7 +120,7 @@ int main(int argc, char* argv[]) {
 
 		// Projection Matrix
 		float fov = 45.0f;   // Field of View in degrees
-		float aspect = 800.0f / 600.0f;  // Assuming an 800x600 window size
+		float aspect = ScreenWidth / ScreenHeight;
 		float nearClip = 0.1f;
 		float farClip = 100.0f;
 		glm::mat4 projection = glm::perspective(glm::radians(fov), aspect, nearClip, farClip);
