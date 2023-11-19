@@ -36,6 +36,7 @@ namespace fs = std::filesystem;
 
 #include <GL/glu.h>
 
+// not using now because of weird behaviour - gl calls not working with error "OpenGL error: invalid operation (1282)"
 #ifdef DEBUG
 #define CHECK_GL_ERROR() \
     do { \
