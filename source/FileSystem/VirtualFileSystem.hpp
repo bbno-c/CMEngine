@@ -31,7 +31,7 @@ public:
     }
 
     void Init(const std::string& rootDirectory) {
-        std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
+        std::string parentDir = (fs::current_path()/*.fs::path::parent_path()*/).string();
         rootDirectory_ = parentDir + "/" + rootDirectory;
     }
 

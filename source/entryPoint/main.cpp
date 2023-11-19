@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 
 	using namespace CMEngine;
 
-	VirtualFileSystem::GetInstance().Init("../../Assets/");
+	VirtualFileSystem::GetInstance().Init("Assets/");
 
 	Window window(ScreenWidth, ScreenHeight, "My Game Engine");
 
