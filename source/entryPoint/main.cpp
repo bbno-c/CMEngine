@@ -16,6 +16,8 @@
 
 #include <utility/Base.h>
 
+const int SPHERE_SUBDIVISIONS = 30;
+
 constexpr const uint16_t ScreenWidth = 1920;
 constexpr const uint16_t ScreenHeight = 1080;
 
@@ -55,32 +57,26 @@ int main(int argc, char* argv[]) {
 	// Creates camera object
 	std::shared_ptr<Camera> camera = std::make_unique<Camera>(ScreenWidth, ScreenHeight);
 
-	std::vector<glm::vec3> sphereVertices;
-	std::vector<glm::vec3> sphereNormals;
-	const int latitudeDivisions = 20;
-	const int longitudeDivisions = 20;
 	const float radius = 1.0f;
 
-	for (int lat = 0; lat <= latitudeDivisions; lat++) {
-		float theta = lat * glm::pi<float>() / latitudeDivisions;
-		float sinTheta = sin(theta);
-		float cosTheta = cos(theta);
+	// Vertex data
+	GLfloat verticesSphere[(SPHERE_SUBDIVISIONS + 1) * (SPHERE_SUBDIVISIONS + 1) * 3];
 
-		for (int lon = 0; lon <= longitudeDivisions; lon++) {
-			float phi = lon * 2 * glm::pi<float>() / longitudeDivisions;
-			float sinPhi = sin(phi);
-			float cosPhi = cos(phi);
+	int index = 0;
+	for (int i = 0; i <= SPHERE_SUBDIVISIONS; ++i) {
+		for (int j = 0; j <= SPHERE_SUBDIVISIONS; ++j) {
+			float theta = static_cast<float>(i) / SPHERE_SUBDIVISIONS * static_cast<float>(M_PI);
+			float phi = static_cast<float>(j) / SPHERE_SUBDIVISIONS * static_cast<float>(2 * M_PI);
 
-			float x = cosPhi * sinTheta;
-			float y = cosTheta;
-			float z = sinPhi * sinTheta;
+			float x = radius * std::sin(theta) * std::cos(phi);
+			float y = radius * std::cos(theta);
+			float z = radius * std::sin(theta) * std::sin(phi);
 
-			sphereVertices.push_back(glm::vec3(radius * x, radius * y, radius * z));
-			sphereNormals.push_back(glm::vec3(x, y, z));
+			verticesSphere[index++] = x;
+			verticesSphere[index++] = y;
+			verticesSphere[index++] = z;
 		}
 	}
-
-
 
 	float vertices[] = {
 	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -109,28 +105,30 @@ int main(int argc, char* argv[]) {
 	};
 
 	Shader shader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
-
 	VertexArray va;
-	va.Bind();
-	va.Unbind();
-
 	VertexBuffer vb(vertices, sizeof(vertices));
 	VertexBufferLayout layout;
 	layout.Push<float>(3);
 	layout.Push<float>(2);
-
 	va.AddBuffer(vb, layout);
-
 	IndexBuffer ib(indices, sizeof(indices) / sizeof(uint32_t));
-
 	Texture texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/tr.png"));
 	texture.Bind();
 	shader.UploadUniformInt("u_Texture", 0);
-
 	va.Unbind();
 	vb.Unbind();
 	ib.Unbind();
 	shader.Unbind();
+
+	Shader shaderSphere("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+	VertexArray vaSphere;
+	VertexBuffer vbSphere(verticesSphere, sizeof(verticesSphere));
+	VertexBufferLayout layoutSphere;
+	layoutSphere.Push<float>(3);
+	vaSphere.AddBuffer(vbSphere, layoutSphere);
+	vaSphere.Unbind();
+	vbSphere.Unbind();
+	shaderSphere.Unbind();
 
 	float angleInDegrees = 0.0f; // Initial rotation angle.
 	float rotationSpeed = 20.0f; // Rotation speed in degrees per second.
@@ -140,10 +138,6 @@ int main(int argc, char* argv[]) {
 	glEnable(GL_DEPTH_TEST);
 
 	Renderer renderer;
-
-
-	bool show_demo_window = true;
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	while (!window.IsClosed()) {
 		Uint32 currentTime = SDL_GetTicks();
@@ -178,14 +172,31 @@ int main(int argc, char* argv[]) {
 		glm::vec3 rotationAxis = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
 		// Incorporate the rotation into the Model matrix
 		model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
-
 		// Handles camera inputs
-		shader.Bind();
 		shader.UploadUniformMat4("model", model);
 		shader.UploadUniformMat4("view", camera->GetViewMatrix());
 		shader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
 		renderer.Draw(va, ib, shader);
+
+		// Model Matrix
+		glm::mat4 modelSphere = glm::mat4(1.0f);  // Initialize with identity matrix
+		//modelSphere = glm::translate(modelSphere, glm::vec3(0.0f, 0.0f, 0.0f));  // No translation
+		//modelSphere = glm::rotate(modelSphere, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
+		//modelSphere = glm::scale(modelSphere, glm::vec3(1.0f, 1.0f, 1.0f));  // No scaling
+		//angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
+		//// Normalize the diagonal to use as rotation axis (very important)
+		//glm::vec3 rotationAxis = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
+		//// Incorporate the rotation into the Model matrix
+		//model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
+		//// Handles camera inputs
+		shaderSphere.UploadUniformMat4("model", modelSphere);
+		shaderSphere.UploadUniformMat4("view", camera->GetViewMatrix());
+		shaderSphere.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+		vaSphere.Bind();
+		// Draw the sphere
+		glDrawArrays(GL_POINTS, 0, (SPHERE_SUBDIVISIONS + 1) * (SPHERE_SUBDIVISIONS + 1));
+
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -13,7 +13,7 @@ namespace CMEngine {
 		va.Bind();
 		ib.Bind();
 
-		(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
+		(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, 0));
 	}
 
 }
