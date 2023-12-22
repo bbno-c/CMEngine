@@ -59,6 +59,16 @@ namespace CMEngine {
         UpdateViewMatrix();
     }
 
+    void Camera::MoveUp(float deltaTime) {
+        position += up * movementSpeed /** deltaTime*/;
+        UpdateViewMatrix();
+    }
+
+    void Camera::MoveDown(float deltaTime) {
+        position -= up * movementSpeed /** deltaTime*/;
+        UpdateViewMatrix();
+    }
+
     void Camera::Rotate(float xoffset, float yoffset, bool constrainPitch) {
         xoffset *= rotationSpeed;
         yoffset *= rotationSpeed;

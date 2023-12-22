@@ -14,9 +14,15 @@ namespace CMEngine {
         void MoveBackward(float deltaTime);
         void MoveLeft(float deltaTime);
         void MoveRight(float deltaTime);
+        void MoveUp(float deltaTime);
+        void MoveDown(float deltaTime);
         void Rotate(float xoffset, float yoffset, bool constrainPitch = true);
         const glm::mat4& GetViewMatrix() const;
         const glm::mat4& GetProjectionMatrix() const;
+
+        const glm::vec3& GetPosition() const {
+            return position;
+        }
 
     private:
         void UpdateViewMatrix();

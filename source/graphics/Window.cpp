@@ -70,12 +70,12 @@ namespace CMEngine {
         if (keystates[SDL_SCANCODE_D]) {
             camera->MoveRight(deltaTime);
         }
-        //if (keystates[SDL_SCANCODE_SPACE]) {
-        //    Position += speed * Up;
-        //}
-        //if (keystates[SDL_SCANCODE_LCTRL]) {
-        //    Position -= speed * Up;
-        //}
+        if (keystates[SDL_SCANCODE_SPACE]) {
+            camera->MoveUp(deltaTime);
+        }
+        if (keystates[SDL_SCANCODE_LCTRL]) {
+            camera->MoveDown(deltaTime);
+        }
         //if (keystates[SDL_SCANCODE_LSHIFT]) {
         //    speed = 0.4f;
         //}
