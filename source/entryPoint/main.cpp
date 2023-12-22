@@ -57,36 +57,60 @@ int main(int argc, char* argv[]) {
 	// Creates camera object
 	std::shared_ptr<Camera> camera = std::make_unique<Camera>(ScreenWidth, ScreenHeight);
 
-	const float radius = 1.0f;
+	float vertices_triangles[] = {
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-	// Vertex data
-	GLfloat verticesSphere[(SPHERE_SUBDIVISIONS + 1) * (SPHERE_SUBDIVISIONS + 1) * 3];
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-	int index = 0;
-	for (int i = 0; i <= SPHERE_SUBDIVISIONS; ++i) {
-		for (int j = 0; j <= SPHERE_SUBDIVISIONS; ++j) {
-			float theta = static_cast<float>(i) / SPHERE_SUBDIVISIONS * static_cast<float>(M_PI);
-			float phi = static_cast<float>(j) / SPHERE_SUBDIVISIONS * static_cast<float>(2 * M_PI);
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-			float x = radius * std::sin(theta) * std::cos(phi);
-			float y = radius * std::cos(theta);
-			float z = radius * std::sin(theta) * std::sin(phi);
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-			verticesSphere[index++] = x;
-			verticesSphere[index++] = y;
-			verticesSphere[index++] = z;
-		}
-	}
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+	};
 
 	float vertices[] = {
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 1.0f 
+		// aPos               // texCoord 
+		0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 
+		0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 
+	   -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 
+	   -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 
+		0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 
+		0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 
+	   -0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 
+	   -0.5f,  0.5f,  0.5f,   1.0f, 1.0f 
 	};
 
 	unsigned int indices[] = {
@@ -101,38 +125,45 @@ int main(int argc, char* argv[]) {
 		0, 3, 4,
 		3, 4, 7,
 		1, 2, 5,
-		2, 5, 6 
+		2, 5, 6
 	};
 
-	Shader shader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+	Shader shader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
 	VertexArray va;
-	VertexBuffer vb(vertices, sizeof(vertices));
+	VertexBuffer vb(vertices_triangles, sizeof(vertices_triangles));
 	VertexBufferLayout layout;
 	layout.Push<float>(3);
-	layout.Push<float>(2);
+	//layout.Push<float>(2);
+	layout.Push<float>(3);
 	va.AddBuffer(vb, layout);
 	IndexBuffer ib(indices, sizeof(indices) / sizeof(uint32_t));
-	Texture texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/tr.png"));
-	texture.Bind();
-	shader.UploadUniformInt("u_Texture", 0);
+	//Texture texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/tr.png"));
+	//texture.Bind();
+	//shader.UploadUniformInt("u_Texture", 0);
 	va.Unbind();
 	vb.Unbind();
 	ib.Unbind();
 	shader.Unbind();
 
-	Shader shaderSphere("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
-	VertexArray vaSphere;
-	VertexBuffer vbSphere(verticesSphere, sizeof(verticesSphere));
-	VertexBufferLayout layoutSphere;
-	layoutSphere.Push<float>(3);
-	vaSphere.AddBuffer(vbSphere, layoutSphere);
-	vaSphere.Unbind();
-	vbSphere.Unbind();
-	shaderSphere.Unbind();
+	Shader shader_light_source("shaders/basic_color_vs.glsl", "shaders/basic_color_fs.glsl");
+	shader_light_source.UploadUniformFloat3("objectColor", glm::vec3(1.0f,1.0f,1.0f));
+	VertexArray va_light;
+	VertexBuffer vb_light(vertices, sizeof(vertices));
+	VertexBufferLayout layout_light;
+	layout_light.Push<float>(3);
+	layout_light.Push<float>(2);
+	va_light.AddBuffer(vb_light, layout_light);
+	IndexBuffer ib_light(indices, sizeof(indices) / sizeof(uint32_t));
+	va_light.Unbind();
+	vb_light.Unbind();
+	ib_light.Unbind();
+	shader_light_source.Unbind();
 
 	float angleInDegrees = 0.0f; // Initial rotation angle.
 	float rotationSpeed = 20.0f; // Rotation speed in degrees per second.
 	Uint32 lastTime = SDL_GetTicks(); // Outside the loop, get the initial time.
+
+	glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_DEPTH_TEST);
@@ -150,53 +181,54 @@ int main(int argc, char* argv[]) {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL3_NewFrame();
 		ImGui::NewFrame();
-
 		{
-			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-			ImGui::SliderFloat("float", &rotationSpeed, 0.0f, 100.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
+			ImGui::Begin("Control Panel");
+			ImGui::SliderFloat3("Cube Position", glm::value_ptr(cubePosition), -10.0f, 10.0f);
+			ImGui::SliderFloat("rotation speed", &rotationSpeed, 0.0f, 100.0f);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+				1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 		}
 
 		renderer.Clear();
 
-		// Model Matrix
-		glm::mat4 model = glm::mat4(1.0f);  // Initialize with identity matrix
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));  // No translation
-		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));  // No scaling
-		angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
-		// Normalize the diagonal to use as rotation axis (very important)
-		glm::vec3 rotationAxis = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
-		// Incorporate the rotation into the Model matrix
-		model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
-		// Handles camera inputs
-		shader.UploadUniformMat4("model", model);
-		shader.UploadUniformMat4("view", camera->GetViewMatrix());
-		shader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+		{
+			// Model Matrix
+			glm::mat4 model = glm::mat4(1.0f);  // Initialize with identity matrix
+			model = glm::translate(model, glm::vec3(-1.0f, 1.0f, -1.0f));  // No translation
+			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
+			model = glm::scale(model, glm::vec3(.3f, .3f, .3f));  // No scaling
+			// Handles camera inputs
+			shader_light_source.UploadUniformMat4("model", model);
+			shader_light_source.UploadUniformMat4("view", camera->GetViewMatrix());
+			shader_light_source.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
-		renderer.Draw(va, ib, shader);
+			renderer.Draw(va_light, ib_light, shader_light_source);
+		}
 
-		// Model Matrix
-		glm::mat4 modelSphere = glm::mat4(1.0f);  // Initialize with identity matrix
-		//modelSphere = glm::translate(modelSphere, glm::vec3(0.0f, 0.0f, 0.0f));  // No translation
-		//modelSphere = glm::rotate(modelSphere, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
-		//modelSphere = glm::scale(modelSphere, glm::vec3(1.0f, 1.0f, 1.0f));  // No scaling
-		//angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
-		//// Normalize the diagonal to use as rotation axis (very important)
-		//glm::vec3 rotationAxis = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
-		//// Incorporate the rotation into the Model matrix
-		//model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
-		//// Handles camera inputs
-		shaderSphere.UploadUniformMat4("model", modelSphere);
-		shaderSphere.UploadUniformMat4("view", camera->GetViewMatrix());
-		shaderSphere.UploadUniformMat4("projection", camera->GetProjectionMatrix());
-		vaSphere.Bind();
-		// Draw the sphere
-		glDrawArrays(GL_POINTS, 0, (SPHERE_SUBDIVISIONS + 1) * (SPHERE_SUBDIVISIONS + 1));
+		{
+			// Model Matrix
+			glm::mat4 model = glm::mat4(1.0f);  // Initialize with identity matrix
+			model = glm::translate(model, cubePosition);  // No translation
+			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));  // No scaling
+			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
+			// Normalize the diagonal to use as rotation axis (very important)
+			glm::vec3 rotationAxis = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
+			// Incorporate the rotation into the Model matrix
+			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
+			// Handles camera inputs
+			shader.UploadUniformMat4("model", model);
+			shader.UploadUniformMat4("view", camera->GetViewMatrix());
+			shader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
+			shader.UploadUniformFloat3("lightPos", glm::vec3(-1.0f, 1.0f, -1.0f));
+			shader.UploadUniformFloat3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+			shader.UploadUniformFloat3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+			shader.UploadUniformFloat3("viewPos", camera->GetPosition());
+
+			renderer.Draw(va, 36, shader);
+		}
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

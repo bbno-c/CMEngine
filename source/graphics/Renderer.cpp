@@ -16,4 +16,11 @@ namespace CMEngine {
 		(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, 0));
 	}
 
+	void Renderer::Draw(const VertexArray& va, const int count, const Shader& shader) const {
+		shader.Bind();
+		va.Bind();
+
+		(glDrawArrays(GL_TRIANGLES, 0, count));
+	}
+
 }
