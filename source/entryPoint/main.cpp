@@ -16,18 +16,15 @@
 
 #include <utility/Base.h>
 
-const int SPHERE_SUBDIVISIONS = 30;
-
 constexpr const uint16_t ScreenWidth = 1920;
 constexpr const uint16_t ScreenHeight = 1080;
 
 int main(int argc, char* argv[]) {
-
 	using namespace CMEngine;
 
-	VirtualFileSystem::GetInstance().Init("Assets/");
+	VirtualFileSystem::GetInstance().Init("../../../../Assets/");
 
-	Window window(ScreenWidth, ScreenHeight, "My Game Engine");
+	Window window(ScreenWidth, ScreenHeight, "Master's Degree Showcase (CMEngine)");
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -57,7 +54,7 @@ int main(int argc, char* argv[]) {
 	// Creates camera object
 	std::shared_ptr<Camera> camera = std::make_unique<Camera>(ScreenWidth, ScreenHeight);
 
-	float vertices_triangles[] = {
+	float learnogl_vertices[] = {
 	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -65,12 +62,12 @@ int main(int argc, char* argv[]) {
 	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
 	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
@@ -130,19 +127,19 @@ int main(int argc, char* argv[]) {
 
 	Shader shader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
 	VertexArray va;
-	VertexBuffer vb(vertices_triangles, sizeof(vertices_triangles));
+	VertexBuffer vb(learnogl_vertices, sizeof(learnogl_vertices));
 	VertexBufferLayout layout;
 	layout.Push<float>(3);
 	//layout.Push<float>(2);
 	layout.Push<float>(3);
 	va.AddBuffer(vb, layout);
-	IndexBuffer ib(indices, sizeof(indices) / sizeof(uint32_t));
+	//IndexBuffer ib(indices_triangles, sizeof(indices_triangles) / sizeof(uint32_t));
 	//Texture texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/tr.png"));
 	//texture.Bind();
 	//shader.UploadUniformInt("u_Texture", 0);
 	va.Unbind();
 	vb.Unbind();
-	ib.Unbind();
+	//ib.Unbind();
 	shader.Unbind();
 
 	Shader shader_light_source("shaders/basic_color_vs.glsl", "shaders/basic_color_fs.glsl");
@@ -164,6 +161,7 @@ int main(int argc, char* argv[]) {
 	Uint32 lastTime = SDL_GetTicks(); // Outside the loop, get the initial time.
 
 	glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 lightCubePosition = glm::vec3(-1.5f, 1.5f, -1.5f);
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_DEPTH_TEST);
@@ -184,7 +182,11 @@ int main(int argc, char* argv[]) {
 		{
 			ImGui::Begin("Control Panel");
 			ImGui::SliderFloat3("Cube Position", glm::value_ptr(cubePosition), -10.0f, 10.0f);
+			ImGui::SliderFloat3("Light Cube Position", glm::value_ptr(lightCubePosition), -10.0f, 10.0f);
 			ImGui::SliderFloat("rotation speed", &rotationSpeed, 0.0f, 100.0f);
+
+
+
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
 				1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
@@ -195,7 +197,7 @@ int main(int argc, char* argv[]) {
 		{
 			// Model Matrix
 			glm::mat4 model = glm::mat4(1.0f);  // Initialize with identity matrix
-			model = glm::translate(model, glm::vec3(-1.0f, 1.0f, -1.0f));  // No translation
+			model = glm::translate(model, lightCubePosition);  // No translation
 			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
 			model = glm::scale(model, glm::vec3(.3f, .3f, .3f));  // No scaling
 			// Handles camera inputs
@@ -222,10 +224,20 @@ int main(int argc, char* argv[]) {
 			shader.UploadUniformMat4("view", camera->GetViewMatrix());
 			shader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
-			shader.UploadUniformFloat3("lightPos", glm::vec3(-1.0f, 1.0f, -1.0f));
+			shader.UploadUniformFloat3("lightPos", lightCubePosition);
 			shader.UploadUniformFloat3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
 			shader.UploadUniformFloat3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 			shader.UploadUniformFloat3("viewPos", camera->GetPosition());
+
+			shader.UploadUniformFloat3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+			shader.UploadUniformFloat3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+			shader.UploadUniformFloat3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+			shader.UploadUniformFloat("material.shininess", 32.0f);
+
+			shader.UploadUniformFloat3("light.position", lightCubePosition);
+			shader.UploadUniformFloat3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+			shader.UploadUniformFloat3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
+			shader.UploadUniformFloat3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
 			renderer.Draw(va, 36, shader);
 		}
