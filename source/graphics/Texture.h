@@ -12,6 +12,7 @@ namespace CMEngine {
 
 		inline int32_t GetWidth() const { return m_Width; }
 		inline int32_t GetHeight() const { return m_Height; }
+		inline uint32_t GetID() const { return m_RendererID; };
 
 	private:
 		uint32_t m_RendererID;
