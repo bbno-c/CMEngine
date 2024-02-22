@@ -126,6 +126,19 @@ int main(int argc, char* argv[]) {
 		2, 5, 6
 	};
 
+	glm::vec3 cubePositions[] = {
+	glm::vec3(0.0f,  0.0f,  0.0f),
+	glm::vec3(2.0f,  5.0f, -15.0f),
+	glm::vec3(-1.5f, -2.2f, -2.5f),
+	glm::vec3(-3.8f, -2.0f, -12.3f),
+	glm::vec3(2.4f, -0.4f, -3.5f),
+	glm::vec3(-1.7f,  3.0f, -7.5f),
+	glm::vec3(1.3f, -2.0f, -2.5f),
+	glm::vec3(1.5f,  2.0f, -2.5f),
+	glm::vec3(1.5f,  0.2f, -1.5f),
+	glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
 	Shader shader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
 	VertexArray va;
 	VertexBuffer vb(learnogl_vertices, sizeof(learnogl_vertices));
@@ -164,11 +177,11 @@ int main(int argc, char* argv[]) {
 	shader_light_source.Unbind();
 
 	float angleInDegrees = 0.0f; // Initial rotation angle.
-	float rotationSpeed = 20.0f; // Rotation speed in degrees per second.
+	float rotationSpeed = 0.0f; // Rotation speed in degrees per second.
 	Uint32 lastTime = SDL_GetTicks(); // Outside the loop, get the initial time.
 
 	glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 lightCubePosition = glm::vec3(-1.5f, 1.5f, -1.5f);
+	glm::vec3 lightCubePosition = glm::vec3(-2.0f, 2.0f, -2.0f);
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_DEPTH_TEST);
@@ -215,11 +228,13 @@ int main(int argc, char* argv[]) {
 			renderer.Draw(va_light, ib_light, shader_light_source);
 		}
 
+		for (uint32_t i = 0; i < 10; i++)
 		{
 			// Model Matrix
 			glm::mat4 model = glm::mat4(1.0f);  // Initialize with identity matrix
-			model = glm::translate(model, cubePosition);  // No translation
-			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
+			model = glm::translate(model, cubePositions[i]);  // No translation
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));  // No scaling
 			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
 			// Normalize the diagonal to use as rotation axis (very important)
