@@ -23,6 +23,9 @@ namespace CMEngine {
         const glm::vec3& GetPosition() const {
             return position;
         }
+        const glm::vec3& GetFront() const {
+            return front;
+        }
 
     private:
         void UpdateViewMatrix();

@@ -139,6 +139,13 @@ int main(int argc, char* argv[]) {
 	glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	glm::vec3 pointLightPositions[] = {
+	glm::vec3(0.7f,  0.2f,  2.0f),
+	glm::vec3(2.3f, -3.3f, -4.0f),
+	glm::vec3(-4.0f,  2.0f, -12.0f),
+	glm::vec3(0.0f,  0.0f, -3.0f)
+	};
+
 	Shader shader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
 	VertexArray va;
 	VertexBuffer vb(learnogl_vertices, sizeof(learnogl_vertices));
@@ -156,6 +163,11 @@ int main(int argc, char* argv[]) {
 	Texture texture2(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2_specular.png"));
 	//texture2.Bind(1);
 	shader.UploadUniformInt("material.specular", 1);
+
+	shader.UploadUniformFloat3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+	shader.UploadUniformFloat3("dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+	shader.UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
+	shader.UploadUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
 	va.Unbind();
 	vb.Unbind();
@@ -214,10 +226,11 @@ int main(int argc, char* argv[]) {
 
 		renderer.Clear();
 
+		for (uint32_t i = 0; i < 4; i++)
 		{
 			// Model Matrix
 			glm::mat4 model = glm::mat4(1.0f);  // Initialize with identity matrix
-			model = glm::translate(model, lightCubePosition);  // No translation
+			model = glm::translate(model, pointLightPositions[i]);  // No translation
 			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
 			model = glm::scale(model, glm::vec3(.3f, .3f, .3f));  // No scaling
 			// Handles camera inputs
@@ -245,18 +258,43 @@ int main(int argc, char* argv[]) {
 			shader.UploadUniformMat4("model", model);
 			shader.UploadUniformMat4("view", camera->GetViewMatrix());
 			shader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
-
-			shader.UploadUniformFloat3("lightPos", lightCubePosition);
-			shader.UploadUniformFloat3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-			shader.UploadUniformFloat3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 			shader.UploadUniformFloat3("viewPos", camera->GetPosition());
-
 			shader.UploadUniformFloat("material.shininess", 32.0f);
 
-			shader.UploadUniformFloat3("light.position", lightCubePosition);
-			shader.UploadUniformFloat3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-			shader.UploadUniformFloat3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
-			shader.UploadUniformFloat3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+			for (uint32_t i = 0; i < 4; i++) {
+				std::stringstream uniformStream;
+				uniformStream << "pointLights[" << i << "].position";
+				shader.UploadUniformFloat3(uniformStream.str().c_str(), pointLightPositions[i]);
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].constant";
+				shader.UploadUniformFloat(uniformStream.str().c_str(), 1.0f);
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].linear";
+				shader.UploadUniformFloat(uniformStream.str().c_str(), 0.09f);
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].quadratic";
+				shader.UploadUniformFloat(uniformStream.str().c_str(), 0.032f);
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].ambient";
+				shader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.05f, 0.05f, 0.05f));
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].diffuse";
+				shader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.8f, 0.8f, 0.8f));
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].specular";
+				shader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(1.0f, 1.0f, 1.0f));
+			}
+
+			shader.UploadUniformFloat3("spotLight.position", camera->GetPosition());
+			shader.UploadUniformFloat3("spotLight.direction", camera->GetFront());
+			shader.UploadUniformFloat3("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+			shader.UploadUniformFloat3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
+			shader.UploadUniformFloat3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+			shader.UploadUniformFloat("spotLight.constant", 1.0f);
+			shader.UploadUniformFloat("spotLight.linear", 0.09f);
+			shader.UploadUniformFloat("spotLight.quadratic", 0.032f);
+			shader.UploadUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+			shader.UploadUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
 			texture.Bind(0);
 			texture2.Bind(1);
