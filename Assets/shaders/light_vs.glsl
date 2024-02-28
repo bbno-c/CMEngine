@@ -11,6 +11,8 @@ out vec3 FragPos;
 out vec3 Normal;
 out vec2 TexCoords;
 
+out vec4 clipSpace;
+
 void main()
 {
     FragPos = vec3(model * vec4(aPos, 1.0));
@@ -18,4 +20,6 @@ void main()
     TexCoords = aTexCoords;
 
     gl_Position = projection * view * vec4(FragPos, 1.0);
+
+    clipSpace =  model * vec4(aPos, 1.0);
 }

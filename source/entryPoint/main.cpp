@@ -164,6 +164,11 @@ int main(int argc, char* argv[]) {
 	//texture2.Bind(1);
 	shader.UploadUniformInt("material.specular", 1);
 
+	Texture texture_bat_signal(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/bat_logo.png"));
+	shader.UploadUniformInt("spotLight.diffuse_txt", 2);
+	shader.UploadUniformInt("spotLight.specular_txt", 3);
+
+
 	shader.UploadUniformFloat3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
 	shader.UploadUniformFloat3("dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
 	shader.UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
@@ -285,8 +290,8 @@ int main(int argc, char* argv[]) {
 				shader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(1.0f, 1.0f, 1.0f));
 			}
 
-			shader.UploadUniformFloat3("spotLight.position", camera->GetPosition());
-			shader.UploadUniformFloat3("spotLight.direction", camera->GetFront());
+			shader.UploadUniformFloat3("spotLight.position", glm::vec3(0.0f, 0.0f, 3.0f));//camera->GetPosition());
+			shader.UploadUniformFloat3("spotLight.direction", glm::vec3(0.2f, 0.0f, -1.0f));// camera->GetFront());
 			shader.UploadUniformFloat3("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
 			shader.UploadUniformFloat3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
 			shader.UploadUniformFloat3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
@@ -298,6 +303,8 @@ int main(int argc, char* argv[]) {
 
 			texture.Bind(0);
 			texture2.Bind(1);
+			texture_bat_signal.Bind(2);
+			texture_bat_signal.Bind(3);
 
 			renderer.Draw(va, 36, shader);
 		}
