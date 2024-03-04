@@ -109,6 +109,15 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC "${ENGINE_ROOT}/FileSystem"
 )
 
+add_library(Assimp SHARED IMPORTED)
+set_target_properties(Assimp PROPERTIES
+    IMPORTED_LOCATION "${EXTERNALS_PATH}/assimpdll/lib/assimp-vc143-mt.dll"
+    IMPORTED_IMPLIB "${EXTERNALS_PATH}/assimpdll/lib//assimp-vc143-mt.lib"
+    INTERFACE_INCLUDE_DIRECTORIES "${EXTERNALS_PATH}/assimpdll/include"
+)
+target_link_libraries(${PROJECT_NAME} 
+    PUBLIC Assimp
+)
 target_precompile_headers( ${PROJECT_NAME} PUBLIC source/common.h)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
