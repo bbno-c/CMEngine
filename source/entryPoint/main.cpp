@@ -13,6 +13,7 @@
 #include <graphics/IndexBuffer.h>
 #include <graphics/Texture.h>
 #include <graphics/Camera.h>
+#include <graphics/Model.h>
 
 #include <utility/Base.h>
 
@@ -146,52 +147,100 @@ int main(int argc, char* argv[]) {
 	glm::vec3(0.0f,  0.0f, -3.0f)
 	};
 
-	Shader shader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
-	VertexArray va;
-	VertexBuffer vb(learnogl_vertices, sizeof(learnogl_vertices));
-	VertexBufferLayout layout;
-	layout.Push<float>(3);
-	layout.Push<float>(3);
-	layout.Push<float>(2);
-	va.AddBuffer(vb, layout);
-	//IndexBuffer ib(indices_triangles, sizeof(indices_triangles) / sizeof(uint32_t));
-
-	Texture texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2.png"));
-	//texture.Bind(0);
-	shader.UploadUniformInt("material.diffuse", 0);
-
-	Texture texture2(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2_specular.png"));
-	//texture2.Bind(1);
-	shader.UploadUniformInt("material.specular", 1);
-
-	Texture texture_bat_signal(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/bat_logo.png"));
-	shader.UploadUniformInt("spotLight.diffuse_txt", 2);
-	shader.UploadUniformInt("spotLight.specular_txt", 3);
 
 
-	shader.UploadUniformFloat3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-	shader.UploadUniformFloat3("dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-	shader.UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
-	shader.UploadUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+	Vertex lightVertices[] =
+	{ //     COORDINATES     //
+		Vertex{glm::vec3(-0.1f, -0.1f,  0.1f)},
+		Vertex{glm::vec3(-0.1f, -0.1f, -0.1f)},
+		Vertex{glm::vec3(0.1f, -0.1f, -0.1f)},
+		Vertex{glm::vec3(0.1f, -0.1f,  0.1f)},
+		Vertex{glm::vec3(-0.1f,  0.1f,  0.1f)},
+		Vertex{glm::vec3(-0.1f,  0.1f, -0.1f)},
+		Vertex{glm::vec3(0.1f,  0.1f, -0.1f)},
+		Vertex{glm::vec3(0.1f,  0.1f,  0.1f)}
+	};
 
-	va.Unbind();
-	vb.Unbind();
-	//ib.Unbind();
-	shader.Unbind();
+	GLuint lightIndices[] =
+	{
+		0, 1, 2,
+		0, 2, 3,
+		0, 4, 7,
+		0, 7, 3,
+		3, 7, 6,
+		3, 6, 2,
+		2, 6, 5,
+		2, 5, 1,
+		1, 5, 4,
+		1, 4, 0,
+		4, 5, 6,
+		4, 6, 7
+	};
 
-	Shader shader_light_source("shaders/basic_color_vs.glsl", "shaders/basic_color_fs.glsl");
-	shader_light_source.UploadUniformFloat3("objectColor", glm::vec3(1.0f,1.0f,1.0f));
-	VertexArray va_light;
-	VertexBuffer vb_light(vertices, sizeof(vertices));
-	VertexBufferLayout layout_light;
-	layout_light.Push<float>(3);
-	layout_light.Push<float>(2);
-	va_light.AddBuffer(vb_light, layout_light);
-	IndexBuffer ib_light(indices, sizeof(indices) / sizeof(uint32_t));
-	va_light.Unbind();
-	vb_light.Unbind();
-	ib_light.Unbind();
-	shader_light_source.Unbind();
+	Texture textures[]
+	{
+		Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/planks.png")),
+		Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/planksSpec.png"))
+	};
+	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
+	Shader lightShader("shaders/light.vert", "shaders/light.frag");
+	std::vector <Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
+	std::vector <GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
+	Mesh light(lightVerts, lightInd, tex);
+	lightShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	Shader ourShader("shaders/texture_vs.glsl", "shaders/texture_fs.glsl");
+	Model ourModel(VirtualFileSystem::GetInstance().GetVFSFilePath("models/backpack/backpack.obj"));
+	ourShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	//Shader shader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
+	//VertexArray va;
+	//VertexBuffer vb(learnogl_vertices, sizeof(learnogl_vertices));
+	//VertexBufferLayout layout;
+	//layout.Push<float>(3);
+	//layout.Push<float>(3);
+	//layout.Push<float>(2);
+	//va.AddBuffer(vb, layout);
+	////IndexBuffer ib(indices_triangles, sizeof(indices_triangles) / sizeof(uint32_t));
+
+	//Texture texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2.png"));
+	////texture.Bind(0);
+	//shader.UploadUniformInt("material.diffuse", 0);
+
+	//Texture texture2(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2_specular.png"));
+	////texture2.Bind(1);
+	//shader.UploadUniformInt("material.specular", 1);
+
+	//Texture texture_bat_signal(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/bat_logo.png"));
+	//shader.UploadUniformInt("spotLight.diffuse_txt", 2);
+	//shader.UploadUniformInt("spotLight.specular_txt", 3);
+
+
+	//shader.UploadUniformFloat3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+	//shader.UploadUniformFloat3("dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+	//shader.UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
+	//shader.UploadUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+	//va.Unbind();
+	//vb.Unbind();
+	////ib.Unbind();
+	//shader.Unbind();
+
+	//Shader shader_light_source("shaders/basic_color_vs.glsl", "shaders/basic_color_fs.glsl");
+	//shader_light_source.UploadUniformFloat3("objectColor", glm::vec3(1.0f,1.0f,1.0f));
+	//VertexArray va_light;
+	//VertexBuffer vb_light(vertices, sizeof(vertices));
+	//VertexBufferLayout layout_light;
+	//layout_light.Push<float>(3);
+	//layout_light.Push<float>(2);
+	//va_light.AddBuffer(vb_light, layout_light);
+	//IndexBuffer ib_light(indices, sizeof(indices) / sizeof(uint32_t));
+	//va_light.Unbind();
+	//vb_light.Unbind();
+	//ib_light.Unbind();
+	//shader_light_source.Unbind();
 
 	float angleInDegrees = 0.0f; // Initial rotation angle.
 	float rotationSpeed = 0.0f; // Rotation speed in degrees per second.
@@ -231,83 +280,106 @@ int main(int argc, char* argv[]) {
 
 		renderer.Clear();
 
-		for (uint32_t i = 0; i < 4; i++)
-		{
-			// Model Matrix
-			glm::mat4 model = glm::mat4(1.0f);  // Initialize with identity matrix
-			model = glm::translate(model, pointLightPositions[i]);  // No translation
-			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
-			model = glm::scale(model, glm::vec3(.3f, .3f, .3f));  // No scaling
-			// Handles camera inputs
-			shader_light_source.UploadUniformMat4("model", model);
-			shader_light_source.UploadUniformMat4("view", camera->GetViewMatrix());
-			shader_light_source.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
-			renderer.Draw(va_light, ib_light, shader_light_source);
+		{
+			glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
+			glm::mat4 objectModel = glm::mat4(1.0f);
+			objectModel = glm::translate(objectModel, objectPos);
+			lightShader.UploadUniformMat4("model", objectModel);
+			lightShader.UploadUniformMat4("view", camera->GetViewMatrix());
+			lightShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+
+			light.Draw(renderer, lightShader);
 		}
 
-		for (uint32_t i = 0; i < 10; i++)
 		{
-			// Model Matrix
-			glm::mat4 model = glm::mat4(1.0f);  // Initialize with identity matrix
-			model = glm::translate(model, cubePositions[i]);  // No translation
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));  // No scaling
-			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
-			// Normalize the diagonal to use as rotation axis (very important)
-			glm::vec3 rotationAxis = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
-			// Incorporate the rotation into the Model matrix
-			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
-			// Handles camera inputs
-			shader.UploadUniformMat4("model", model);
-			shader.UploadUniformMat4("view", camera->GetViewMatrix());
-			shader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
-			shader.UploadUniformFloat3("viewPos", camera->GetPosition());
-			shader.UploadUniformFloat("material.shininess", 32.0f);
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+			ourShader.UploadUniformMat4("model", model);
+			ourShader.UploadUniformMat4("view", camera->GetViewMatrix());
+			ourShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
-			for (uint32_t i = 0; i < 4; i++) {
-				std::stringstream uniformStream;
-				uniformStream << "pointLights[" << i << "].position";
-				shader.UploadUniformFloat3(uniformStream.str().c_str(), pointLightPositions[i]);
-				uniformStream.str("");
-				uniformStream << "pointLights[" << i << "].constant";
-				shader.UploadUniformFloat(uniformStream.str().c_str(), 1.0f);
-				uniformStream.str("");
-				uniformStream << "pointLights[" << i << "].linear";
-				shader.UploadUniformFloat(uniformStream.str().c_str(), 0.09f);
-				uniformStream.str("");
-				uniformStream << "pointLights[" << i << "].quadratic";
-				shader.UploadUniformFloat(uniformStream.str().c_str(), 0.032f);
-				uniformStream.str("");
-				uniformStream << "pointLights[" << i << "].ambient";
-				shader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.05f, 0.05f, 0.05f));
-				uniformStream.str("");
-				uniformStream << "pointLights[" << i << "].diffuse";
-				shader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.8f, 0.8f, 0.8f));
-				uniformStream.str("");
-				uniformStream << "pointLights[" << i << "].specular";
-				shader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(1.0f, 1.0f, 1.0f));
-			}
-
-			shader.UploadUniformFloat3("spotLight.position", glm::vec3(0.0f, 0.0f, 3.0f));//camera->GetPosition());
-			shader.UploadUniformFloat3("spotLight.direction", glm::vec3(0.2f, 0.0f, -1.0f));// camera->GetFront());
-			shader.UploadUniformFloat3("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
-			shader.UploadUniformFloat3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
-			shader.UploadUniformFloat3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-			shader.UploadUniformFloat("spotLight.constant", 1.0f);
-			shader.UploadUniformFloat("spotLight.linear", 0.09f);
-			shader.UploadUniformFloat("spotLight.quadratic", 0.032f);
-			shader.UploadUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-			shader.UploadUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
-
-			texture.Bind(0);
-			texture2.Bind(1);
-			texture_bat_signal.Bind(2);
-			texture_bat_signal.Bind(3);
-
-			renderer.Draw(va, 36, shader);
+			ourModel.Draw(renderer, ourShader);
 		}
+
+		//for (uint32_t i = 0; i < 4; i++)
+		//{
+		//	// Model Matrix
+		//	glm::mat4 model = glm::mat4(1.0f);  // Initialize with identity matrix
+		//	model = glm::translate(model, pointLightPositions[i]);  // No translation
+		//	model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
+		//	model = glm::scale(model, glm::vec3(.3f, .3f, .3f));  // No scaling
+		//	// Handles camera inputs
+		//	shader_light_source.UploadUniformMat4("model", model);
+		//	shader_light_source.UploadUniformMat4("view", camera->GetViewMatrix());
+		//	shader_light_source.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+
+		//	renderer.Draw(va_light, ib_light, shader_light_source);
+		//}
+
+		//for (uint32_t i = 0; i < 10; i++)
+		//{
+		//	// Model Matrix
+		//	glm::mat4 model = glm::mat4(1.0f);  // Initialize with identity matrix
+		//	model = glm::translate(model, cubePositions[i]);  // No translation
+		//	float angle = 20.0f * i;
+		//	model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		//	model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));  // No scaling
+		//	angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
+		//	// Normalize the diagonal to use as rotation axis (very important)
+		//	glm::vec3 rotationAxis = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
+		//	// Incorporate the rotation into the Model matrix
+		//	model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
+		//	// Handles camera inputs
+		//	shader.UploadUniformMat4("model", model);
+		//	shader.UploadUniformMat4("view", camera->GetViewMatrix());
+		//	shader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+		//	shader.UploadUniformFloat3("viewPos", camera->GetPosition());
+		//	shader.UploadUniformFloat("material.shininess", 32.0f);
+
+		//	for (uint32_t i = 0; i < 4; i++) {
+		//		std::stringstream uniformStream;
+		//		uniformStream << "pointLights[" << i << "].position";
+		//		shader.UploadUniformFloat3(uniformStream.str().c_str(), pointLightPositions[i]);
+		//		uniformStream.str("");
+		//		uniformStream << "pointLights[" << i << "].constant";
+		//		shader.UploadUniformFloat(uniformStream.str().c_str(), 1.0f);
+		//		uniformStream.str("");
+		//		uniformStream << "pointLights[" << i << "].linear";
+		//		shader.UploadUniformFloat(uniformStream.str().c_str(), 0.09f);
+		//		uniformStream.str("");
+		//		uniformStream << "pointLights[" << i << "].quadratic";
+		//		shader.UploadUniformFloat(uniformStream.str().c_str(), 0.032f);
+		//		uniformStream.str("");
+		//		uniformStream << "pointLights[" << i << "].ambient";
+		//		shader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.05f, 0.05f, 0.05f));
+		//		uniformStream.str("");
+		//		uniformStream << "pointLights[" << i << "].diffuse";
+		//		shader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.8f, 0.8f, 0.8f));
+		//		uniformStream.str("");
+		//		uniformStream << "pointLights[" << i << "].specular";
+		//		shader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(1.0f, 1.0f, 1.0f));
+		//	}
+
+		//	shader.UploadUniformFloat3("spotLight.position", glm::vec3(0.0f, 0.0f, 3.0f));//camera->GetPosition());
+		//	shader.UploadUniformFloat3("spotLight.direction", glm::vec3(0.2f, 0.0f, -1.0f));// camera->GetFront());
+		//	shader.UploadUniformFloat3("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+		//	shader.UploadUniformFloat3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
+		//	shader.UploadUniformFloat3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		//	shader.UploadUniformFloat("spotLight.constant", 1.0f);
+		//	shader.UploadUniformFloat("spotLight.linear", 0.09f);
+		//	shader.UploadUniformFloat("spotLight.quadratic", 0.032f);
+		//	shader.UploadUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+		//	shader.UploadUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+
+		//	//texture.Bind(0);
+		//	//texture2.Bind(1);
+		//	//texture_bat_signal.Bind(2);
+		//	//texture_bat_signal.Bind(3);
+
+		//	renderer.Draw(va, 36, shader);
+		//}
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
