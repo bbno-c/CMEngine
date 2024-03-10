@@ -20,12 +20,31 @@
 constexpr const uint16_t ScreenWidth = 1920;
 constexpr const uint16_t ScreenHeight = 1080;
 
+void GLAPIENTRY
+MessageCallback(GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam)
+{
+	fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+		type, severity, message);
+	//assert(type == GL_DEBUG_TYPE_ERROR);
+}
+
 int main(int argc, char* argv[]) {
 	using namespace CMEngine;
 
 	VirtualFileSystem::GetInstance().Init("../../../../Assets/");
 
 	Window window(ScreenWidth, ScreenHeight, "Master's Degree Showcase (CMEngine)");
+
+	// During init, enable debug output
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(MessageCallback, 0);
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -177,22 +196,19 @@ int main(int argc, char* argv[]) {
 		4, 6, 7
 	};
 
-	Texture textures[]
-	{
-		Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/planks.png")),
-		Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/planksSpec.png"))
-	};
-	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
-	Shader lightShader("shaders/light.vert", "shaders/light.frag");
-	std::vector <Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
-	std::vector <GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
-	Mesh light(lightVerts, lightInd, tex);
-	lightShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	//Shader lightShader("shaders/light.vert", "shaders/light.frag");
+	//std::vector <Texture>	tex;
+	//std::vector <Vertex>	lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
+	//std::vector <GLuint>	lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
+	//Mesh light(lightVerts, lightInd, tex);
+	//lightShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 
-	Shader ourShader("shaders/texture_vs.glsl", "shaders/texture_fs.glsl");
+	//Shader ourShader("shaders/texture_vs.glsl", "shaders/texture_fs.glsl");
+	Shader ourShader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
 	Model ourModel(VirtualFileSystem::GetInstance().GetVFSFilePath("models/backpack/backpack.obj"));
-	ourShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	//ourShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 
 	//Shader shader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
@@ -270,9 +286,6 @@ int main(int argc, char* argv[]) {
 			ImGui::SliderFloat3("Cube Position", glm::value_ptr(cubePosition), -10.0f, 10.0f);
 			ImGui::SliderFloat3("Light Cube Position", glm::value_ptr(lightCubePosition), -10.0f, 10.0f);
 			ImGui::SliderFloat("rotation speed", &rotationSpeed, 0.0f, 100.0f);
-
-
-
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
 				1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
@@ -280,25 +293,71 @@ int main(int argc, char* argv[]) {
 
 		renderer.Clear();
 
+		//{
+		//	glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
+		//	glm::mat4 objectModel = glm::mat4(1.0f);
+		//	objectModel = glm::translate(objectModel, objectPos);
+		//	lightShader.UploadUniformMat4("model", objectModel);
+		//	lightShader.UploadUniformMat4("view", camera->GetViewMatrix());
+		//	lightShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
-		{
-			glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
-			glm::mat4 objectModel = glm::mat4(1.0f);
-			objectModel = glm::translate(objectModel, objectPos);
-			lightShader.UploadUniformMat4("model", objectModel);
-			lightShader.UploadUniformMat4("view", camera->GetViewMatrix());
-			lightShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
-
-			light.Draw(renderer, lightShader);
-		}
+		//	light.Draw(renderer, lightShader);
+		//}
 
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
+			model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
+			glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
+
 			ourShader.UploadUniformMat4("model", model);
 			ourShader.UploadUniformMat4("view", camera->GetViewMatrix());
 			ourShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+
+			ourShader.UploadUniformFloat3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+			ourShader.UploadUniformFloat3("dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+			ourShader.UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
+			ourShader.UploadUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+			ourShader.UploadUniformFloat("material.shininess", 32.0f);
+
+			for (uint32_t i = 0; i < 4; i++) {
+				std::stringstream uniformStream;
+				uniformStream << "pointLights[" << i << "].position";
+				ourShader.UploadUniformFloat3(uniformStream.str().c_str(), pointLightPositions[i]);
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].constant";
+				ourShader.UploadUniformFloat(uniformStream.str().c_str(), 1.0f);
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].linear";
+				ourShader.UploadUniformFloat(uniformStream.str().c_str(), 0.09f);
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].quadratic";
+				ourShader.UploadUniformFloat(uniformStream.str().c_str(), 0.032f);
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].ambient";
+				ourShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.05f, 0.05f, 0.05f));
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].diffuse";
+				ourShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.8f, 0.8f, 0.8f));
+				uniformStream.str("");
+				uniformStream << "pointLights[" << i << "].specular";
+				ourShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(1.0f, 1.0f, 1.0f));
+			}
+
+			ourShader.UploadUniformFloat3("spotLight.position", camera->GetPosition());
+			ourShader.UploadUniformFloat3("spotLight.direction", camera->GetFront());
+			ourShader.UploadUniformFloat3("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+			ourShader.UploadUniformFloat3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
+			ourShader.UploadUniformFloat3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+			ourShader.UploadUniformFloat("spotLight.constant", 1.0f);
+			ourShader.UploadUniformFloat("spotLight.linear", 0.09f);
+			ourShader.UploadUniformFloat("spotLight.quadratic", 0.032f);
+			ourShader.UploadUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+			ourShader.UploadUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
 			ourModel.Draw(renderer, ourShader);
 		}

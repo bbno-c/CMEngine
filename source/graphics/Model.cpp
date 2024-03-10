@@ -26,6 +26,12 @@ namespace CMEngine {
             std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
             return;
         }
+
+        size_t dotPosition = path.find_last_of('.');
+        if (dotPosition != std::string::npos) {
+            modelFileFormat = path.substr(dotPosition + 1);
+        }
+
         // retrieve the directory path of the filepath
         directory = path.substr(0, path.find_last_of('/'));
 
@@ -157,7 +163,7 @@ namespace CMEngine {
             }
             if (!skip)
             {   // if texture hasn't been loaded already, load it
-                Texture texture(str.C_Str(), this->directory, typeName);
+                Texture texture(str.C_Str(), this->directory, typeName, modelFileFormat == "obj");
                 textures.push_back(texture);
                 textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
             }

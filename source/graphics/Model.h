@@ -25,6 +25,7 @@ namespace CMEngine {
         std::vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
         std::vector<Mesh>    meshes;
         std::string directory;
+        std::string modelFileFormat;
         bool gammaCorrection;
 
         // constructor, expects a filepath to a 3D model.

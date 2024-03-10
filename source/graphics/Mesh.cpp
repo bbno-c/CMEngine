@@ -39,7 +39,8 @@ namespace CMEngine {
             else if (name == "texture_specular")
                 number = std::to_string(specularNr++);
 
-            shader.UploadUniformInt((/*"material." +*/ name + number).c_str(), i);
+            auto uniformName = "material." + name + number;
+            shader.UploadUniformInt(uniformName.c_str(), i);
             textures[i].Bind(i);
         }
 

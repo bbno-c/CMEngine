@@ -13,7 +13,7 @@ namespace CMEngine {
         }
 
         // Set the desired OpenGL version
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
         const char* glsl_version = "#version 330";
 

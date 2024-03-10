@@ -5,7 +5,7 @@ namespace CMEngine {
 	class Texture {
 	public:
 		Texture() {};
-		Texture(const char* path, const std::string& directory, const std::string& type);
+		Texture(const char* path, const std::string& directory, const std::string& type, bool flipVertically = true);
 		Texture(const std::string& path);
 		~Texture();
 
