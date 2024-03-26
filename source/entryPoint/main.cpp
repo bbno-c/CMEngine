@@ -196,17 +196,17 @@ int main(int argc, char* argv[]) {
 		4, 6, 7
 	};
 
-	//Shader lightShader("shaders/light.vert", "shaders/light.frag");
-	//std::vector <Texture>	tex;
-	//std::vector <Vertex>	lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
-	//std::vector <GLuint>	lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
-	//Mesh light(lightVerts, lightInd, tex);
-	//lightShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	Shader lightShader("shaders/light.vert", "shaders/light.frag");
+	std::vector <Texture>	tex;
+	std::vector <Vertex>	lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
+	std::vector <GLuint>	lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
+	Mesh light(lightVerts, lightInd, tex);
+	lightShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 
 	//Shader ourShader("shaders/texture_vs.glsl", "shaders/texture_fs.glsl");
 	Shader ourShader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
-	Model ourModel(VirtualFileSystem::GetInstance().GetVFSFilePath("models/backpack/backpack.obj"));
+	Model ourModel(VirtualFileSystem::GetInstance().GetVFSFilePath("models/sponza/scene.gltf"));
 
 	//ourShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -293,22 +293,24 @@ int main(int argc, char* argv[]) {
 
 		renderer.Clear();
 
-		//{
-		//	glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
-		//	glm::mat4 objectModel = glm::mat4(1.0f);
-		//	objectModel = glm::translate(objectModel, objectPos);
-		//	lightShader.UploadUniformMat4("model", objectModel);
-		//	lightShader.UploadUniformMat4("view", camera->GetViewMatrix());
-		//	lightShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+		{
+			for (uint32_t i = 0; i < 4; i++) {
+				glm::mat4 objectModel = glm::mat4(1.0f);
+				objectModel = glm::translate(objectModel, pointLightPositions[i]);
+				lightShader.UploadUniformMat4("model", objectModel);
+				lightShader.UploadUniformMat4("view", camera->GetViewMatrix());
+				lightShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
-		//	light.Draw(renderer, lightShader);
-		//}
+				light.Draw(renderer, lightShader);
+			}
+
+		}
 
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+			model = glm::translate(model, cubePosition); // translate it down so it's at the center of the scene
 			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
-			model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+			model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
 			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
 			glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
@@ -339,7 +341,7 @@ int main(int argc, char* argv[]) {
 				ourShader.UploadUniformFloat(uniformStream.str().c_str(), 0.032f);
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].ambient";
-				ourShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.05f, 0.05f, 0.05f));
+				ourShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.5f, 0.5f, 0.5f));
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].diffuse";
 				ourShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.8f, 0.8f, 0.8f));
