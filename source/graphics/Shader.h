@@ -6,6 +6,7 @@ namespace CMEngine {
 	class Shader {
 	public:
 		Shader(std::string vertex_source_path, std::string fragment_source_path);
+		Shader(std::string vertex_source_path, std::string fragment_source_path, std::string geometry_source_path);
 		~Shader();
         Shader(const Shader& other) = delete;
         Shader& operator=(const Shader& other) = delete;
@@ -28,7 +29,7 @@ namespace CMEngine {
     private:
 		uint32_t loadShader(const GLenum type, const char* file_path);
 		uint32_t createShaderProgram(const uint32_t vertex_shader, const uint32_t fragment_shader);
-
+		uint32_t createShaderProgram(const uint32_t vertex_shader, const uint32_t fragment_shader, const uint32_t geometry_shader);
 	private:
 		uint32_t m_ID;
 	};

@@ -208,6 +208,9 @@ int main(int argc, char* argv[]) {
 	Shader ourShader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
 	Model ourModel(VirtualFileSystem::GetInstance().GetVFSFilePath("models/sponza/scene.gltf"));
 
+	//Shader NormalShader("shaders/normal_vs.glsl", "shaders/normal_fs.glsl", "shaders/normal_gm.glsl");
+
+
 	//ourShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 
@@ -267,6 +270,7 @@ int main(int argc, char* argv[]) {
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_FRAMEBUFFER_SRGB); 
 
 	Renderer renderer;
 
@@ -303,7 +307,6 @@ int main(int argc, char* argv[]) {
 
 				light.Draw(renderer, lightShader);
 			}
-
 		}
 
 		{
@@ -362,6 +365,12 @@ int main(int argc, char* argv[]) {
 			ourShader.UploadUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
 			ourModel.Draw(renderer, ourShader);
+
+			//NormalShader.UploadUniformMat4("model", model);
+			//NormalShader.UploadUniformMat4("view", camera->GetViewMatrix());
+			//NormalShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+			//ourModel.Draw(renderer, NormalShader);
+
 		}
 
 		//for (uint32_t i = 0; i < 4; i++)
