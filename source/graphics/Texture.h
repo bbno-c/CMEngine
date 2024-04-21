@@ -17,6 +17,7 @@ namespace CMEngine {
 		inline uint32_t GetID() const { return m_RendererID; };
 		inline std::string GetPath() const { return m_FilePath; };
 		inline std::string GetType() const { return m_Type; };
+		inline void SetType(const std::string& type) { m_Type = type; };
 
 	private:
 		uint32_t m_RendererID;

@@ -74,78 +74,6 @@ int main(int argc, char* argv[]) {
 	// Creates camera object
 	std::shared_ptr<Camera> camera = std::make_unique<Camera>(ScreenWidth, ScreenHeight);
 
-	float learnogl_vertices[] = {
-		// positions          // normals           // texture coords
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-	};
-
-	float vertices[] = {
-		// aPos               // texCoord 
-		0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 
-		0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 
-	   -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 
-	   -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 
-		0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 
-		0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 
-	   -0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 
-	   -0.5f,  0.5f,  0.5f,   1.0f, 1.0f 
-	};
-
-	unsigned int indices[] = {
-		0, 1, 3,
-		1, 2, 3,
-		4, 5, 7,
-		5, 6, 7,
-		0, 1, 4,
-		1, 4, 5,
-		2, 3, 6,
-		3, 6, 7,
-		0, 3, 4,
-		3, 4, 7,
-		1, 2, 5,
-		2, 5, 6
-	};
-
 	glm::vec3 cubePositions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f),
 	glm::vec3(2.0f,  5.0f, -15.0f),
@@ -165,8 +93,6 @@ int main(int argc, char* argv[]) {
 	glm::vec3(-4.0f,  2.0f, -12.0f),
 	glm::vec3(0.0f,  0.0f, -3.0f)
 	};
-
-
 
 	Vertex lightVertices[] =
 	{ //     COORDINATES     //
@@ -196,6 +122,20 @@ int main(int argc, char* argv[]) {
 		4, 6, 7
 	};
 
+	Vertex planeVertices[] =
+	{ //     COORDINATES     //
+		Vertex{glm::vec3(-1, -1,  1), glm::vec3(0, 1,  0), glm::vec2(0, 0)},
+		Vertex{glm::vec3(-1, -1, -1), glm::vec3(0, 1,  0), glm::vec2(0, 1)},
+		Vertex{glm::vec3(1, -1, -1), glm::vec3(0, 1,  0), glm::vec2(1, 1)},
+		Vertex{glm::vec3(1, -1,  1), glm::vec3(0, 1,  0), glm::vec2(1, 0)}
+	};
+
+	GLuint plaaneIndices[] =
+	{
+		0, 1, 2,
+		0, 2, 3
+	};
+
 	Shader lightShader("shaders/light.vert", "shaders/light.frag");
 	std::vector <Texture>	tex;
 	std::vector <Vertex>	lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
@@ -203,6 +143,15 @@ int main(int argc, char* argv[]) {
 	Mesh light(lightVerts, lightInd, tex);
 	lightShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
+	std::vector <Texture>	planeTex{
+		Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/planks.png")),
+		Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/planksSpec.png"))
+	};
+	planeTex[0].SetType("texture_diffuse");
+	planeTex[1].SetType("texture_specular");
+	std::vector <Vertex>	planeVerts(planeVertices, planeVertices + sizeof(planeVertices) / sizeof(Vertex));
+	std::vector <GLuint>	planeInd(plaaneIndices, plaaneIndices + sizeof(plaaneIndices) / sizeof(GLuint));
+	Mesh planeMesh(planeVerts, planeInd, planeTex);
 
 	//Shader ourShader("shaders/texture_vs.glsl", "shaders/texture_fs.glsl");
 	Shader ourShader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
@@ -309,6 +258,7 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
+
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePosition); // translate it down so it's at the center of the scene
@@ -371,6 +321,18 @@ int main(int argc, char* argv[]) {
 			//NormalShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 			//ourModel.Draw(renderer, NormalShader);
 
+		}
+
+		{
+			glm::mat4 objectModel = glm::mat4(1.0f);
+			objectModel = glm::translate(objectModel, glm::vec3(.0f, -10.0f, .0f));
+			objectModel = glm::scale(objectModel, glm::vec3(50.0f, 1.0f, 50.0f));	// it's a bit too big for our scene, so scale it down
+
+			ourShader.UploadUniformMat4("model", objectModel);
+			ourShader.UploadUniformMat4("view", camera->GetViewMatrix());
+			ourShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+
+			planeMesh.Draw(renderer, ourShader);
 		}
 
 		//for (uint32_t i = 0; i < 4; i++)
