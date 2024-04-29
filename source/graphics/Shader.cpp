@@ -13,6 +13,19 @@ namespace CMEngine {
 			std::cout << "Shader creation took " << t.ElapsedMillis() << " ms" << std::endl;
 		}
 	}
+
+	Shader::Shader(std::string vertex_source_path, std::string fragment_source_path, std::string geometry_source_path) {
+		uint32_t vertex, fragment, geometry;
+		vertex = loadShader(GL_VERTEX_SHADER, vertex_source_path.c_str());
+		fragment = loadShader(GL_FRAGMENT_SHADER, fragment_source_path.c_str());
+		geometry = loadShader(GL_GEOMETRY_SHADER, geometry_source_path.c_str());
+		{
+			Timer t;
+			m_ID = createShaderProgram(vertex, fragment, geometry);
+			std::cout << "Shader creation took " << t.ElapsedMillis() << " ms" << std::endl;
+		}
+	}
+
 	Shader::~Shader() {
 		glDeleteProgram(m_ID);
 	}
@@ -77,6 +90,29 @@ namespace CMEngine {
 		// After linking, shaders can be deleted
 		glDeleteShader(vertex_shader);
 		glDeleteShader(fragment_shader);
+
+		return program;
+	}
+	uint32_t Shader::createShaderProgram(const uint32_t vertex_shader, const uint32_t fragment_shader, const uint32_t geometry_shader) {
+		const uint32_t program = glCreateProgram();
+		glAttachShader(program, vertex_shader);
+		glAttachShader(program, fragment_shader);
+		glAttachShader(program, geometry_shader);
+		glLinkProgram(program);
+
+		// Check for linking errors
+		int success;
+		glGetProgramiv(program, GL_LINK_STATUS, &success);
+		if (!success) {
+			char info_log[512];
+			glGetProgramInfoLog(program, 512, NULL, info_log);
+			std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << info_log << std::endl;
+		}
+
+		// After linking, shaders can be deleted
+		glDeleteShader(vertex_shader);
+		glDeleteShader(fragment_shader);
+		glDeleteShader(geometry_shader);
 
 		return program;
 	}

@@ -4,19 +4,20 @@
 namespace CMEngine {
 
     VertexArray::VertexArray() {
-        (glGenVertexArrays(1, &rendererID));
+        glGenVertexArrays(1, &m_RendererID);
     }
 
     VertexArray::~VertexArray() {
-        (glDeleteVertexArrays(1, &rendererID));
+        if (m_RendererID != 0) {
+            glDeleteVertexArrays(1, &m_RendererID);
+        }
     }
-
     void VertexArray::Bind() const {
-        (glBindVertexArray(rendererID));
+        glBindVertexArray(m_RendererID);
     }
 
     void VertexArray::Unbind() const {
-        (glBindVertexArray(0));
+        glBindVertexArray(0);
     }
 
     void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout) {
@@ -27,9 +28,9 @@ namespace CMEngine {
 
         for (size_t i = 0; i < elements.size(); i++) {
             const auto& element = elements[i];
-            (glEnableVertexAttribArray(i));
-            (glVertexAttribPointer(i, element.count, element.type, element.normalized,
-                layout.GetStride(), (const void*)offset));
+            glEnableVertexAttribArray(i);
+            glVertexAttribPointer(i, element.count, element.type, element.normalized,
+                layout.GetStride(), (const void*)offset);
             offset += element.count * VertexBufferLayout::VertexBufferElement::GetSizeOfType(element.type);
         }
         vb.Unbind();
