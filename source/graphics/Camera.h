@@ -4,6 +4,9 @@
 
 namespace CMEngine {
 
+    constexpr const float CAM_NEAR = 0.1f;
+    constexpr const float CAM_FAR = 75.0f;
+
     class Camera {
     public:
         Camera(int screenWidth, int screenHeight);

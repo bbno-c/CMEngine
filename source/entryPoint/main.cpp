@@ -31,10 +31,10 @@ void renderQuad()
 	{
 		float quadVertices[] = {
 			// positions        // texture Coords
-			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
-			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-			 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
-			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+			-1.f,  -0.5f, 0.0f, 0.0f, 1.0f,
+			-1.f, -1.f, 0.0f, 0.0f, 0.0f,
+			 -0.5f,  -0.5f, 0.0f, 1.0f, 1.0f,
+			 -0.5f, -1.f, 0.0f, 1.0f, 0.0f,
 		};
 
 
@@ -66,7 +66,10 @@ MessageCallback(GLenum source,
 	fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
 		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
 		type, severity, message);
-	//assert(type == GL_DEBUG_TYPE_ERROR);
+	if (type == GL_DEBUG_TYPE_ERROR)
+	{
+		int a = 0;
+	};
 }
 
 int main(int argc, char* argv[]) {
@@ -140,6 +143,50 @@ int main(int argc, char* argv[]) {
 		Vertex{glm::vec3(0.1f,  0.1f,  0.1f)}
 	};
 
+	float cube_vertices[] = {
+		// positions          // normals           // texture coords
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+	};
 	GLuint lightIndices[] =
 	{
 		0, 1, 2,
@@ -158,10 +205,10 @@ int main(int argc, char* argv[]) {
 
 	Vertex planeVertices[] =
 	{ //     COORDINATES     //
-		Vertex{glm::vec3(-1, -1,  1), glm::vec3(0, 1,  0), glm::vec2(0, 0)},
-		Vertex{glm::vec3(-1, -1, -1), glm::vec3(0, 1,  0), glm::vec2(0, 1)},
-		Vertex{glm::vec3(1, -1, -1), glm::vec3(0, 1,  0), glm::vec2(1, 1)},
-		Vertex{glm::vec3(1, -1,  1), glm::vec3(0, 1,  0), glm::vec2(1, 0)}
+		Vertex{glm::vec3(-10, -1,  10), glm::vec3(0, 1,  0), glm::vec2(0, 0)},
+		Vertex{glm::vec3(-10, -1, -10), glm::vec3(0, 1,  0), glm::vec2(0, 10)},
+		Vertex{glm::vec3(10, -1, -10), glm::vec3(0, 1,  0), glm::vec2(10, 10)},
+		Vertex{glm::vec3(10, -1,  10), glm::vec3(0, 1,  0), glm::vec2(10, 0)}
 	};
 
 	GLuint plaaneIndices[] =
@@ -172,13 +219,37 @@ int main(int argc, char* argv[]) {
 
 	Shader simpleDepthShader("shaders/shadow_mapping_depth_vs.glsl", "shaders/shadow_mapping_depth_fs.glsl");
 	Shader debugDepthQuad("shaders/debug_quad_vs.glsl", "shaders/debug_quad_depth_fs.glsl");
-
 	Shader lightShader("shaders/light.vert", "shaders/light.frag");
+	Shader modelShader("shaders/shadow_mapping_vs.vert", "shaders/shadow_mapping_fs.frag");
+
 	std::vector <Texture>	tex;
 	std::vector <Vertex>	lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
 	std::vector <GLuint>	lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
 	Mesh light(lightVerts, lightInd, tex);
 	lightShader.UploadUniformFloat4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	VertexArray cube_va;
+	VertexBuffer vb(cube_vertices, sizeof(cube_vertices));
+	VertexBufferLayout layout;
+	layout.Push<float>(3);
+	layout.Push<float>(3);
+	layout.Push<float>(2);
+	cube_va.AddBuffer(vb, layout);
+	Texture cube_texture_diff(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2.png"));
+	Texture cube_texture_spec(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2_specular.png"));
+
+	//std::vector <Texture>	cubeTex{
+	//Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2.png"), GL_REPEAT),
+	//Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2_specular.png"), GL_REPEAT)
+	//};
+	//cubeTex[0].SetType("texture_diffuse");
+	//cubeTex[1].SetType("texture_specular");
+	//std::vector <Vertex>	cubeVert(cubeVerticesArray, cubeVerticesArray + sizeof(cubeVerticesArray) / sizeof(Vertex));
+	//std::vector <GLuint>	cubeInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
+	//Mesh cubeMesh(cubeVert, cubeInd, cubeTex);
+
+
 
 	std::vector <Texture>	planeTex{
 		Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/planks.png")),
@@ -190,10 +261,11 @@ int main(int argc, char* argv[]) {
 	std::vector <GLuint>	planeInd(plaaneIndices, plaaneIndices + sizeof(plaaneIndices) / sizeof(GLuint));
 	Mesh planeMesh(planeVerts, planeInd, planeTex);
 
-	Shader ourShader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
-	Model ourModel(VirtualFileSystem::GetInstance().GetVFSFilePath("models/sponza/scene.gltf"));
+	//Shader modelShader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
+	modelShader.UploadUniformInt("shadowMap", 2);
+	//Model modelObject(VirtualFileSystem::GetInstance().GetVFSFilePath("models/sponza/scene.gltf"));
 
-// ### SHADOWS ### //
+	////////////////// SHADOWS
 
 	unsigned int depthMapFBO;
 	glGenFramebuffers(1, &depthMapFBO);
@@ -206,6 +278,9 @@ int main(int argc, char* argv[]) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	float clampColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clampColor);
+
 	// attach depth texture as FBO's depth buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
@@ -215,14 +290,16 @@ int main(int argc, char* argv[]) {
 	debugDepthQuad.Bind();
 	debugDepthQuad.UploadUniformInt("depthMap", 0);
 
-// ### SHADOWS ### //
+	////////////////// SHADOWS
 
 	float angleInDegrees = 0.0f; // Initial rotation angle.
 	float rotationSpeed = 0.0f; // Rotation speed in degrees per second.
+	float shininess = 16.0f; // Rotation speed in degrees per second.
 	Uint32 lastTime = SDL_GetTicks(); // Outside the loop, get the initial time.
 
 	glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 lightCubePosition = glm::vec3(-2.0f, 2.0f, -2.0f);
+	glm::vec3 lightPosition = glm::vec3(0.0f, -1.0f, 0.0f);
+	glm::vec3 lightCubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_DEPTH_TEST);
@@ -245,147 +322,203 @@ int main(int argc, char* argv[]) {
 			ImGui::Begin("Control Panel");
 			ImGui::SliderFloat3("Cube Position", glm::value_ptr(cubePosition), -10.0f, 10.0f);
 			ImGui::SliderFloat3("Light Cube Position", glm::value_ptr(lightCubePosition), -10.0f, 10.0f);
+			ImGui::SliderFloat3("Light Position", glm::value_ptr(lightPosition), -10.0f, 10.0f);
 			ImGui::SliderFloat("rotation speed", &rotationSpeed, 0.0f, 100.0f);
+			ImGui::SliderFloat("Shininess", &shininess, 0.0f, 32.0f);
+
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
 				1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			//ImGui::Image((void*)(intptr_t)depthMap, ImVec2(ScreenWidth/4, ScreenHeight/4));
 			ImGui::End();
 		}
 
 		renderer.Clear();
 
-		float near_plane = 0.1f, far_plane = 100.0f;
+		////////////////// PRE-RENDER SCENE
+
+		// 1. render depth of scene to texture (from light's perspective)
+		glm::mat4 lightProjection, lightView;
+		glm::mat4 lightSpaceMatrix;
+		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, CAM_NEAR, CAM_FAR);
+		//lightView = glm::lookAt(pointLightPositions[0] + lightCubePosition, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+
+		// Use perspective projection instead of orthographic
+		float fov = 45.0f;
+		float aspectRatio = ScreenWidth/ ScreenHeight;
+		float nearPlane = CAM_NEAR;
+		float farPlane = CAM_FAR;
+		//lightProjection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
+		lightView = glm::lookAt(pointLightPositions[0] + lightCubePosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		lightSpaceMatrix = lightProjection * lightView;
+
+		// render scene from light's point of view
+		simpleDepthShader.Bind();
+		//simpleDepthShader.UploadUniformMat4("lightSpaceMatrix", camera->GetProjectionMatrix() * camera->GetViewMatrix());
+		simpleDepthShader.UploadUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+		glViewport(0, 0, ScreenWidth, ScreenHeight);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		//{
+		//	glm::mat4 model = glm::mat4(1.0f);
+		//	model = glm::translate(model, cubePosition); // translate it down so it's at the center of the scene
+		//	model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
+		//	model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
+		//	angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
+		//	glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
+		//	model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
+		//	simpleDepthShader.UploadUniformMat4("model", model);
+		//	modelObject.Draw(renderer, simpleDepthShader);
+		//}
+
+		for (uint32_t i = 0; i < 10; i++)
 		{
-			// 1. render depth of scene to texture (from light's perspective)
-			glm::mat4 lightProjection, lightView;
-			glm::mat4 lightSpaceMatrix;
-			lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-			lightView = glm::lookAt(glm::vec3(5.0f, 5.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-			lightSpaceMatrix = lightProjection * lightView;
-			// render scene from light's point of view
-			simpleDepthShader.Bind();
-			//simpleDepthShader.UploadUniformMat4("lightSpaceMatrix", camera->GetProjectionMatrix() * camera->GetViewMatrix());
-			simpleDepthShader.UploadUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]+ cubePosition);  // No translation
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
+			glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
 
-			glViewport(0, 0, ScreenWidth, ScreenHeight);
-			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-			glClear(GL_DEPTH_BUFFER_BIT);
+			simpleDepthShader.UploadUniformMat4("model", model);
 
-			{
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, cubePosition); // translate it down so it's at the center of the scene
-				model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
-				model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
-				angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
-				glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
-				model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
-				simpleDepthShader.UploadUniformMat4("model", model);
-				ourModel.Draw(renderer, simpleDepthShader);
-			}
-
-			{
-				glm::mat4 objectModel = glm::mat4(1.0f);
-				objectModel = glm::translate(objectModel, glm::vec3(.0f, -10.0f, .0f));
-				objectModel = glm::scale(objectModel, glm::vec3(50.0f, 1.0f, 50.0f));
-				simpleDepthShader.UploadUniformMat4("model", objectModel);
-				planeMesh.Draw(renderer, simpleDepthShader);
-			}
-
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-			// reset viewport
-			glViewport(0, 0, ScreenWidth, ScreenHeight);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+			renderer.Draw(cube_va, 36, simpleDepthShader);
 		}
 
+		//{
+		//	glm::mat4 objectModel = glm::mat4(1.0f);
+		//	objectModel = glm::translate(objectModel, glm::vec3(.0f, -2.0f, .0f));
+		//	simpleDepthShader.UploadUniformMat4("model", objectModel);
+		//	planeMesh.Draw(renderer, simpleDepthShader);
+		//}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// reset viewport
+		glViewport(0, 0, ScreenWidth, ScreenHeight);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+		////////////////// RENDER NORMAL SCENE
+
 		{
-			for (uint32_t i = 0; i < 4; i++) {
+			for (uint32_t i = 0; i < 1; i++) {
 				glm::mat4 objectModel = glm::mat4(1.0f);
-				objectModel = glm::translate(objectModel, pointLightPositions[i]);
+				objectModel = glm::translate(objectModel, pointLightPositions[i]+ lightCubePosition);
 				lightShader.UploadUniformMat4("model", objectModel);
 				lightShader.UploadUniformMat4("view", camera->GetViewMatrix());
 				lightShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 				light.Draw(renderer, lightShader);
 			}
 		}
-		
-		////////////////// RENDER NORMAL SCENE
+
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePosition); // translate it down so it's at the center of the scene
+			model = glm::translate(model, cubePosition+ cubePosition); // translate it down so it's at the center of the scene
 			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
 			model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
 			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
 			glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
 
-			ourShader.UploadUniformMat4("model", model);
-			ourShader.UploadUniformMat4("view", camera->GetViewMatrix());
-			ourShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+			//modelShader.UploadUniformMat4("model", model);
+			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
-			ourShader.UploadUniformFloat3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-			ourShader.UploadUniformFloat3("dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-			ourShader.UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
-			ourShader.UploadUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+			modelShader.UploadUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
 
-			ourShader.UploadUniformFloat("material.shininess", 32.0f);
+			modelShader.UploadUniformFloat3("dirLight.direction", lightPosition);
+			modelShader.UploadUniformFloat3("dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+			modelShader.UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
+			modelShader.UploadUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
-			for (uint32_t i = 0; i < 4; i++) {
+			modelShader.UploadUniformFloat("material.shininess", shininess);
+
+			for (uint32_t i = 0; i < 1; i++) {
 				std::stringstream uniformStream;
 				uniformStream << "pointLights[" << i << "].position";
-				ourShader.UploadUniformFloat3(uniformStream.str().c_str(), pointLightPositions[i]);
+				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), pointLightPositions[i] + lightCubePosition);
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].constant";
-				ourShader.UploadUniformFloat(uniformStream.str().c_str(), 1.0f);
+				modelShader.UploadUniformFloat(uniformStream.str().c_str(), 1.0f);
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].linear";
-				ourShader.UploadUniformFloat(uniformStream.str().c_str(), 0.09f);
+				modelShader.UploadUniformFloat(uniformStream.str().c_str(), 0.09f);
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].quadratic";
-				ourShader.UploadUniformFloat(uniformStream.str().c_str(), 0.032f);
+				modelShader.UploadUniformFloat(uniformStream.str().c_str(), 0.032f);
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].ambient";
-				ourShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.5f, 0.5f, 0.5f));
+				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.5f, 0.5f, 0.5f));
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].diffuse";
-				ourShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.8f, 0.8f, 0.8f));
+				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.8f, 0.8f, 0.8f));
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].specular";
-				ourShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(1.0f, 1.0f, 1.0f));
+				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(1.0f, 1.0f, 1.0f));
 			}
 
-			ourShader.UploadUniformFloat3("spotLight.position", camera->GetPosition());
-			ourShader.UploadUniformFloat3("spotLight.direction", camera->GetFront());
-			ourShader.UploadUniformFloat3("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
-			ourShader.UploadUniformFloat3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
-			ourShader.UploadUniformFloat3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-			ourShader.UploadUniformFloat("spotLight.constant", 1.0f);
-			ourShader.UploadUniformFloat("spotLight.linear", 0.09f);
-			ourShader.UploadUniformFloat("spotLight.quadratic", 0.032f);
-			ourShader.UploadUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-			ourShader.UploadUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+			modelShader.UploadUniformFloat3("spotLight.position", camera->GetPosition());
+			modelShader.UploadUniformFloat3("spotLight.direction", camera->GetFront());
+			modelShader.UploadUniformFloat3("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+			modelShader.UploadUniformFloat3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
+			modelShader.UploadUniformFloat3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+			modelShader.UploadUniformFloat("spotLight.constant", 1.0f);
+			modelShader.UploadUniformFloat("spotLight.linear", 0.09f);
+			modelShader.UploadUniformFloat("spotLight.quadratic", 0.032f);
+			modelShader.UploadUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+			modelShader.UploadUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
-			ourModel.Draw(renderer, ourShader);
+
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, depthMap);
+
+			//modelObject.Draw(renderer, modelShader);
+		}
+
+		for (uint32_t i = 0; i < 10; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]+cubePosition);  // No translation
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			//model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
+			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
+			glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
+
+			modelShader.UploadUniformMat4("model", model);
+			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+
+			modelShader.UploadUniformInt("material.diffuse", 0);
+			modelShader.UploadUniformInt("material.specular", 1);
+
+			cube_texture_diff.Bind(0);
+			cube_texture_spec.Bind(1);
+			renderer.Draw(cube_va, 36, modelShader);
 		}
 
 		{
 			glm::mat4 objectModel = glm::mat4(1.0f);
-			objectModel = glm::translate(objectModel, glm::vec3(.0f, -10.0f, .0f));
-			objectModel = glm::scale(objectModel, glm::vec3(50.0f, 1.0f, 50.0f));	// it's a bit too big for our scene, so scale it down
+			objectModel = glm::translate(objectModel, glm::vec3(.0f, -2.0f, .0f));
 
-			ourShader.UploadUniformMat4("model", objectModel);
-			ourShader.UploadUniformMat4("view", camera->GetViewMatrix());
-			ourShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+			modelShader.UploadUniformMat4("model", objectModel);
+			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
-			planeMesh.Draw(renderer, ourShader);
+			planeMesh.Draw(renderer, modelShader);
 		}
-		////////////////// RENDER NORMAL SCENE
+		////////////////// POST-RENDER
 
 		{
 			// render Depth map to quad for visual debugging
 			debugDepthQuad.Bind();
-			debugDepthQuad.UploadUniformFloat("near_plane", near_plane);
-			debugDepthQuad.UploadUniformFloat("far_plane", far_plane);
+			debugDepthQuad.UploadUniformFloat("near_plane", CAM_NEAR);
+			debugDepthQuad.UploadUniformFloat("far_plane", CAM_FAR);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, depthMap);
 			renderQuad();

@@ -7,6 +7,7 @@ namespace CMEngine {
 		Texture() {};
 		Texture(const char* path, const std::string& directory, const std::string& type, bool flipVertically = true);
 		Texture(const std::string& path);
+		Texture(const std::string& path, int32_t texture_wrap);
 		~Texture();
 
 		void Bind(uint32_t slot = 0) const;

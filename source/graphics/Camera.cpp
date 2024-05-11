@@ -5,7 +5,7 @@
 namespace CMEngine {
 
     Camera::Camera(int screenWidth, int screenHeight)
-        : position(glm::vec3(0.0f, 0.0f, 3.0f)),
+        : position(glm::vec3(0.0f, 0.0f, 0.0f)),
         front(glm::vec3(0.0f, 0.0f, -1.0f)),
         up(glm::vec3(0.0f, 1.0f, 0.0f)),
         yaw(-90.0f),
@@ -15,8 +15,8 @@ namespace CMEngine {
         screenWidth(screenWidth),
         screenHeight(screenHeight),
         fov(45.0f),
-        nearPlane(0.1f),
-        farPlane(100.0f) {
+        nearPlane(CAM_NEAR),
+        farPlane(CAM_FAR) {
         UpdateProjectionMatrix();
         UpdateViewMatrix();
     }
