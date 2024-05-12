@@ -239,18 +239,6 @@ int main(int argc, char* argv[]) {
 	Texture cube_texture_diff(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2.png"));
 	Texture cube_texture_spec(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2_specular.png"));
 
-	//std::vector <Texture>	cubeTex{
-	//Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2.png"), GL_REPEAT),
-	//Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/container2_specular.png"), GL_REPEAT)
-	//};
-	//cubeTex[0].SetType("texture_diffuse");
-	//cubeTex[1].SetType("texture_specular");
-	//std::vector <Vertex>	cubeVert(cubeVerticesArray, cubeVerticesArray + sizeof(cubeVerticesArray) / sizeof(Vertex));
-	//std::vector <GLuint>	cubeInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
-	//Mesh cubeMesh(cubeVert, cubeInd, cubeTex);
-
-
-
 	std::vector <Texture>	planeTex{
 		Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/planks.png")),
 		Texture(VirtualFileSystem::GetInstance().GetVFSFilePath("textures/planksSpec.png"))
@@ -260,10 +248,14 @@ int main(int argc, char* argv[]) {
 	std::vector <Vertex>	planeVerts(planeVertices, planeVertices + sizeof(planeVertices) / sizeof(Vertex));
 	std::vector <GLuint>	planeInd(plaaneIndices, plaaneIndices + sizeof(plaaneIndices) / sizeof(GLuint));
 	Mesh planeMesh(planeVerts, planeInd, planeTex);
+	Mesh planeMesh2(planeVerts, planeInd, planeTex);
+	Mesh planeMesh3(planeVerts, planeInd, planeTex);
+	Mesh planeMesh4(planeVerts, planeInd, planeTex);
+	Mesh planeMesh5(planeVerts, planeInd, planeTex);
 
 	//Shader modelShader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
 	modelShader.UploadUniformInt("shadowMap", 2);
-	//Model modelObject(VirtualFileSystem::GetInstance().GetVFSFilePath("models/sponza/scene.gltf"));
+	Model modelObject(VirtualFileSystem::GetInstance().GetVFSFilePath("models/sponza/scene.gltf"));
 
 	////////////////// SHADOWS
 
@@ -273,7 +265,7 @@ int main(int argc, char* argv[]) {
 	unsigned int depthMap;
 	glGenTextures(1, &depthMap);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, ScreenWidth, ScreenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -297,7 +289,7 @@ int main(int argc, char* argv[]) {
 	float shininess = 16.0f; // Rotation speed in degrees per second.
 	Uint32 lastTime = SDL_GetTicks(); // Outside the loop, get the initial time.
 
-	glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f) + glm::vec3(0.0f, 0.0f, 6.5f);
 	glm::vec3 lightPosition = glm::vec3(0.0f, -1.0f, 0.0f);
 	glm::vec3 lightCubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -357,7 +349,7 @@ int main(int argc, char* argv[]) {
 		//simpleDepthShader.UploadUniformMat4("lightSpaceMatrix", camera->GetProjectionMatrix() * camera->GetViewMatrix());
 		simpleDepthShader.UploadUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
 
-		glViewport(0, 0, ScreenWidth, ScreenHeight);
+		glViewport(0, 0, 2048, 2048);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -376,7 +368,7 @@ int main(int argc, char* argv[]) {
 		for (uint32_t i = 0; i < 10; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]+ cubePosition);  // No translation
+			model = glm::translate(model, cubePositions[i] + cubePosition);  // No translation
 			float angle = 20.0f * i;
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
@@ -503,14 +495,45 @@ int main(int argc, char* argv[]) {
 		}
 
 		{
-			glm::mat4 objectModel = glm::mat4(1.0f);
-			objectModel = glm::translate(objectModel, glm::vec3(.0f, -2.0f, .0f));
-
-			modelShader.UploadUniformMat4("model", objectModel);
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(.0f, -5.0f, .0f));
+			modelShader.UploadUniformMat4("model", model);
 			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
 			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
-
 			planeMesh.Draw(renderer, modelShader);
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, -9.0f));
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			modelShader.UploadUniformMat4("model", model);
+			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+			planeMesh2.Draw(renderer, modelShader);
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 9.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			modelShader.UploadUniformMat4("model", model);
+			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+			planeMesh3.Draw(renderer, modelShader);
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(9.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			modelShader.UploadUniformMat4("model", model);
+			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+			planeMesh4.Draw(renderer, modelShader);
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(-9.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			modelShader.UploadUniformMat4("model", model);
+			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+			planeMesh5.Draw(renderer, modelShader);
+
 		}
 		////////////////// POST-RENDER
 
