@@ -72,6 +72,26 @@ MessageCallback(GLenum source,
 	};
 }
 
+glm::vec3 cubePositionMoving(0.0f, 0.0f, 0.0f);
+float cubeSpeed = 2.0f; // Speed of the cube's movement
+bool movingRight = true;
+
+void UpdateCubePosition(float deltaTime) {
+	if (movingRight) {
+		cubePositionMoving.x += cubeSpeed * deltaTime;
+		if (cubePositionMoving.x > 10.0f) {
+			cubePositionMoving.x = 10.0f;
+			movingRight = false;
+		}
+	}
+	else {
+		cubePositionMoving.x -= cubeSpeed * deltaTime;
+		if (cubePositionMoving.x < -10.0f) {
+			cubePositionMoving.x = -10.0f;
+			movingRight = true;
+		}
+	}
+}
 int main(int argc, char* argv[]) {
 	using namespace CMEngine;
 
@@ -217,7 +237,7 @@ int main(int argc, char* argv[]) {
 		0, 2, 3
 	};
 
-	Shader simpleDepthShader("shaders/shadow_mapping_depth_vs.glsl", "shaders/shadow_mapping_depth_fs.glsl");
+	Shader simpleDepthShader("shaders/shadow_mapping_depth_vs.glsl", "shaders/shadow_mapping_depth_fs.glsl", "shaders/shadow_mapping_depth_gs.glsl");
 	Shader debugDepthQuad("shaders/debug_quad_vs.glsl", "shaders/debug_quad_depth_fs.glsl");
 	Shader lightShader("shaders/light.vert", "shaders/light.frag");
 	Shader modelShader("shaders/shadow_mapping_vs.vert", "shaders/shadow_mapping_fs.frag");
@@ -254,28 +274,30 @@ int main(int argc, char* argv[]) {
 	Mesh planeMesh5(planeVerts, planeInd, planeTex);
 
 	//Shader modelShader("shaders/light_vs.glsl", "shaders/light_fs.glsl");
-	modelShader.UploadUniformInt("shadowMap", 2);
+	modelShader.UploadUniformInt("depthMap", 2);
 	Model modelObject(VirtualFileSystem::GetInstance().GetVFSFilePath("models/sponza/scene.gltf"));
 
 	////////////////// SHADOWS
 
+	// configure depth map FBO
+	// -----------------------
+	const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
 	unsigned int depthMapFBO;
 	glGenFramebuffers(1, &depthMapFBO);
-	// create depth texture
-	unsigned int depthMap;
-	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	float clampColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clampColor);
-
+	// create depth cubemap texture
+	unsigned int depthCubemap;
+	glGenTextures(1, &depthCubemap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+	for (unsigned int i = 0; i < 6; ++i)
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	// attach depth texture as FBO's depth buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -293,6 +315,15 @@ int main(int argc, char* argv[]) {
 	glm::vec3 lightPosition = glm::vec3(0.0f, -1.0f, 0.0f);
 	glm::vec3 lightCubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
+	float Constant = 1.0f;
+	float Linear = 0.09f;
+	float Quadratic = 0.032f;
+	float FarPlane = 25.0f;
+	glm::vec3 Ambient = glm::vec3(0.5f, 0.5f, 0.5f);
+	glm::vec3 Diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
+	glm::vec3 Specular = glm::vec3(1.0f, 1.0f, 1.0f);
+
+
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_FRAMEBUFFER_SRGB); 
@@ -304,6 +335,8 @@ int main(int argc, char* argv[]) {
 		float deltaTime = (currentTime - lastTime) / 1000.0f; // Convert milliseconds to seconds.
 		lastTime = currentTime;
 
+		UpdateCubePosition(deltaTime);
+ 
 		window.Update(deltaTime, camera);
 
 		// Start the Dear ImGui frame
@@ -322,6 +355,27 @@ int main(int argc, char* argv[]) {
 				1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			//ImGui::Image((void*)(intptr_t)depthMap, ImVec2(ScreenWidth/4, ScreenHeight/4));
 			ImGui::End();
+
+			// New floating panel for point lights
+			ImGui::Begin("Point Light Control Panel");
+			//for (int i = 0; i < numberOfPointLights; ++i) 
+			{
+				std::string labelPrefix = "Point Light ";// +std::to_string(i);
+
+				ImGui::Separator();
+				ImGui::Text("%s", labelPrefix.c_str());
+
+				ImGui::SliderFloat3((labelPrefix + " Position").c_str(), glm::value_ptr(lightCubePosition), -10.0f, 10.0f);
+				ImGui::SliderFloat((labelPrefix + " Constant").c_str(), &Constant, 0.0f, 1.0f);
+				ImGui::SliderFloat((labelPrefix + " Linear").c_str(), &Linear, 0.0f, 1.0f);
+				ImGui::SliderFloat((labelPrefix + " Quadratic").c_str(), &Quadratic, 0.0f, 1.0f);
+				ImGui::ColorEdit3((labelPrefix + " Ambient").c_str(), glm::value_ptr(Ambient));
+				ImGui::ColorEdit3((labelPrefix + " Diffuse").c_str(), glm::value_ptr(Diffuse));
+				ImGui::ColorEdit3((labelPrefix + " Specular").c_str(), glm::value_ptr(Specular));
+				ImGui::SliderFloat((labelPrefix + " Far Plane").c_str(), &FarPlane, 0.0f, 1000.0f);
+			}
+			ImGui::End();
+
 		}
 
 		renderer.Clear();
@@ -329,56 +383,79 @@ int main(int argc, char* argv[]) {
 		////////////////// PRE-RENDER SCENE
 
 		// 1. render depth of scene to texture (from light's perspective)
-		glm::mat4 lightProjection, lightView;
-		glm::mat4 lightSpaceMatrix;
-		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, CAM_NEAR, CAM_FAR);
-		//lightView = glm::lookAt(pointLightPositions[0] + lightCubePosition, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		//glm::mat4 lightProjection, lightView;
+		//glm::mat4 lightSpaceMatrix;
+		//lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, CAM_NEAR, CAM_FAR);
+		////lightView = glm::lookAt(pointLightPositions[0] + lightCubePosition, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 
-		// Use perspective projection instead of orthographic
-		float fov = 45.0f;
-		float aspectRatio = ScreenWidth/ ScreenHeight;
-		float nearPlane = CAM_NEAR;
-		float farPlane = CAM_FAR;
-		//lightProjection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
-		lightView = glm::lookAt(pointLightPositions[0] + lightCubePosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//// Use perspective projection instead of orthographic
+		//float fov = 45.0f;
+		//float aspectRatio = ScreenWidth/ ScreenHeight;
+		//float nearPlane = CAM_NEAR;
+		//float farPlane = CAM_FAR;
+		////lightProjection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
+		//lightView = glm::lookAt(pointLightPositions[0] + lightCubePosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		lightSpaceMatrix = lightProjection * lightView;
+		//lightSpaceMatrix = lightProjection * lightView;
+
+		//angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
+
+		glm::vec3 light_pos = pointLightPositions[0] + cubePositionMoving + lightCubePosition;
+		// 0. create depth cubemap transformation matrices
+		// -----------------------------------------------
+		float near_plane = 1.0f;
+		float far_plane = FarPlane;
+		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
+		std::vector<glm::mat4> shadowTransforms;
+		shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+		shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+		shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
 
 		// render scene from light's point of view
-		simpleDepthShader.Bind();
+		//simpleDepthShader.Bind();
 		//simpleDepthShader.UploadUniformMat4("lightSpaceMatrix", camera->GetProjectionMatrix() * camera->GetViewMatrix());
-		simpleDepthShader.UploadUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
+		//simpleDepthShader.UploadUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
 
-		glViewport(0, 0, 2048, 2048);
+		// 1. render scene to depth cubemap
+		// --------------------------------
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
+		for (unsigned int i = 0; i < 6; ++i)
+			simpleDepthShader.UploadUniformMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
+		simpleDepthShader.UploadUniformFloat("far_plane", far_plane);
+		simpleDepthShader.UploadUniformFloat3("lightPos", light_pos);
 
-		//{
-		//	glm::mat4 model = glm::mat4(1.0f);
-		//	model = glm::translate(model, cubePosition); // translate it down so it's at the center of the scene
-		//	model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
-		//	model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
-		//	angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
-		//	glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
-		//	model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
-		//	simpleDepthShader.UploadUniformMat4("model", model);
-		//	modelObject.Draw(renderer, simpleDepthShader);
-		//}
-
-		for (uint32_t i = 0; i < 10; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i] + cubePosition);  // No translation
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			model = glm::translate(model, cubePosition); // translate it down so it's at the center of the scene
+			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
+			model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
 			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
 			glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
-
 			simpleDepthShader.UploadUniformMat4("model", model);
-
-			renderer.Draw(cube_va, 36, simpleDepthShader);
+			modelObject.Draw(renderer, simpleDepthShader);
 		}
+
+		//for (uint32_t i = 0; i < 10; i++)
+		//{
+		//	glm::mat4 model = glm::mat4(1.0f);
+		//	model = glm::translate(model, cubePositions[i] + cubePosition);  // No translation
+		//	float angle = 20.0f * i;
+		//	model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		//	angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
+		//	glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
+		//	model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
+
+		//	simpleDepthShader.UploadUniformMat4("model", model);
+
+		//	renderer.Draw(cube_va, 36, simpleDepthShader);
+		//}
 
 		//{
 		//	glm::mat4 objectModel = glm::mat4(1.0f);
@@ -399,7 +476,7 @@ int main(int argc, char* argv[]) {
 		{
 			for (uint32_t i = 0; i < 1; i++) {
 				glm::mat4 objectModel = glm::mat4(1.0f);
-				objectModel = glm::translate(objectModel, pointLightPositions[i]+ lightCubePosition);
+				objectModel = glm::translate(objectModel, light_pos);
 				lightShader.UploadUniformMat4("model", objectModel);
 				lightShader.UploadUniformMat4("view", camera->GetViewMatrix());
 				lightShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
@@ -409,18 +486,18 @@ int main(int argc, char* argv[]) {
 
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePosition+ cubePosition); // translate it down so it's at the center of the scene
+			model = glm::translate(model, cubePosition); // translate it down so it's at the center of the scene
 			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
 			model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
 			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
 			glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
 
-			//modelShader.UploadUniformMat4("model", model);
+			modelShader.UploadUniformMat4("model", model);
 			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
 			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
-			modelShader.UploadUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
+			//modelShader.UploadUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
 
 			modelShader.UploadUniformFloat3("dirLight.direction", lightPosition);
 			modelShader.UploadUniformFloat3("dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
@@ -432,25 +509,25 @@ int main(int argc, char* argv[]) {
 			for (uint32_t i = 0; i < 1; i++) {
 				std::stringstream uniformStream;
 				uniformStream << "pointLights[" << i << "].position";
-				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), pointLightPositions[i] + lightCubePosition);
+				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), light_pos);
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].constant";
-				modelShader.UploadUniformFloat(uniformStream.str().c_str(), 1.0f);
+				modelShader.UploadUniformFloat(uniformStream.str().c_str(), Constant);
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].linear";
-				modelShader.UploadUniformFloat(uniformStream.str().c_str(), 0.09f);
+				modelShader.UploadUniformFloat(uniformStream.str().c_str(), Linear);
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].quadratic";
-				modelShader.UploadUniformFloat(uniformStream.str().c_str(), 0.032f);
+				modelShader.UploadUniformFloat(uniformStream.str().c_str(), Quadratic);
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].ambient";
-				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.5f, 0.5f, 0.5f));
+				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), Ambient);
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].diffuse";
-				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(0.8f, 0.8f, 0.8f));
+				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), Diffuse);
 				uniformStream.str("");
 				uniformStream << "pointLights[" << i << "].specular";
-				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), glm::vec3(1.0f, 1.0f, 1.0f));
+				modelShader.UploadUniformFloat3(uniformStream.str().c_str(), Specular);
 			}
 
 			modelShader.UploadUniformFloat3("spotLight.position", camera->GetPosition());
@@ -466,87 +543,88 @@ int main(int argc, char* argv[]) {
 
 
 			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, depthMap);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+			modelShader.UploadUniformFloat("far_plane", far_plane);
 
-			//modelObject.Draw(renderer, modelShader);
+			modelObject.Draw(renderer, modelShader);
 		}
 
-		for (uint32_t i = 0; i < 10; i++)
-		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]+cubePosition);  // No translation
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			//model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
-			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
-			glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
+		//for (uint32_t i = 0; i < 10; i++)
+		//{
+		//	glm::mat4 model = glm::mat4(1.0f);
+		//	model = glm::translate(model, cubePositions[i]+cubePosition);  // No translation
+		//	float angle = 20.0f * i;
+		//	model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		//	//model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
+		//	angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
+		//	glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
+		//	model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
 
-			modelShader.UploadUniformMat4("model", model);
-			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
-			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+		//	modelShader.UploadUniformMat4("model", model);
+		//	modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+		//	modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
 
-			modelShader.UploadUniformInt("material.diffuse", 0);
-			modelShader.UploadUniformInt("material.specular", 1);
+		//	modelShader.UploadUniformInt("material.diffuse", 0);
+		//	modelShader.UploadUniformInt("material.specular", 1);
 
-			cube_texture_diff.Bind(0);
-			cube_texture_spec.Bind(1);
-			renderer.Draw(cube_va, 36, modelShader);
-		}
+		//	cube_texture_diff.Bind(0);
+		//	cube_texture_spec.Bind(1);
+		//	renderer.Draw(cube_va, 36, modelShader);
+		//}
 
-		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(.0f, -5.0f, .0f));
-			modelShader.UploadUniformMat4("model", model);
-			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
-			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
-			planeMesh.Draw(renderer, modelShader);
+		//{
+		//	glm::mat4 model = glm::mat4(1.0f);
+		//	model = glm::translate(model, glm::vec3(.0f, -5.0f, .0f));
+		//	modelShader.UploadUniformMat4("model", model);
+		//	modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+		//	modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+		//	planeMesh.Draw(renderer, modelShader);
 
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, -9.0f));
-			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			modelShader.UploadUniformMat4("model", model);
-			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
-			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
-			planeMesh2.Draw(renderer, modelShader);
+		//	model = glm::mat4(1.0f);
+		//	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -9.0f));
+		//	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		//	modelShader.UploadUniformMat4("model", model);
+		//	modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+		//	modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+		//	planeMesh2.Draw(renderer, modelShader);
 
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 9.0f));
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			modelShader.UploadUniformMat4("model", model);
-			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
-			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
-			planeMesh3.Draw(renderer, modelShader);
+		//	model = glm::mat4(1.0f);
+		//	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 9.0f));
+		//	model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		//	modelShader.UploadUniformMat4("model", model);
+		//	modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+		//	modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+		//	planeMesh3.Draw(renderer, modelShader);
 
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(9.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			modelShader.UploadUniformMat4("model", model);
-			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
-			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
-			planeMesh4.Draw(renderer, modelShader);
+		//	model = glm::mat4(1.0f);
+		//	model = glm::translate(model, glm::vec3(9.0f, 0.0f, 0.0f));
+		//	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		//	modelShader.UploadUniformMat4("model", model);
+		//	modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+		//	modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+		//	planeMesh4.Draw(renderer, modelShader);
 
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(-9.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			modelShader.UploadUniformMat4("model", model);
-			modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
-			modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
-			planeMesh5.Draw(renderer, modelShader);
+		//	model = glm::mat4(1.0f);
+		//	model = glm::translate(model, glm::vec3(-9.0f, 0.0f, 0.0f));
+		//	model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		//	modelShader.UploadUniformMat4("model", model);
+		//	modelShader.UploadUniformMat4("view", camera->GetViewMatrix());
+		//	modelShader.UploadUniformMat4("projection", camera->GetProjectionMatrix());
+		//	planeMesh5.Draw(renderer, modelShader);
 
-		}
+		//}
 		////////////////// POST-RENDER
 
-		{
-			// render Depth map to quad for visual debugging
-			debugDepthQuad.Bind();
-			debugDepthQuad.UploadUniformFloat("near_plane", CAM_NEAR);
-			debugDepthQuad.UploadUniformFloat("far_plane", CAM_FAR);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, depthMap);
-			renderQuad();
+		//{
+		//	// render Depth map to quad for visual debugging
+		//	debugDepthQuad.Bind();
+		//	debugDepthQuad.UploadUniformFloat("near_plane", CAM_NEAR);
+		//	debugDepthQuad.UploadUniformFloat("far_plane", CAM_FAR);
+		//	glActiveTexture(GL_TEXTURE0);
+		//	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+		//	renderQuad();
 
-		}
+		//}
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -560,7 +638,7 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-void renderScene(CMEngine::Shader&) {
+void renderScene(CMEngine::Shader& shader) {
 
 
 }
