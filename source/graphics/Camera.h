@@ -30,6 +30,17 @@ namespace CMEngine {
             return front;
         }
 
+        std::string Serialize() const;
+        void Deserialize(const std::string& data);
+
+        void SaveCurrentState();
+        void LoadState(int index);
+        void DeleteState(int index); // New method to delete a state
+        const std::vector<std::string>& GetStates() const;
+
+        void SaveStatesToFile(const std::string& filename);
+        void LoadStatesFromFile(const std::string& filename);
+
     private:
         void UpdateViewMatrix();
         void UpdateProjectionMatrix();
@@ -48,5 +59,8 @@ namespace CMEngine {
         float farPlane;
         glm::mat4 viewMatrix;
         glm::mat4 projectionMatrix;
+
+        std::vector<std::string> cameraStates;
+
     };
 }

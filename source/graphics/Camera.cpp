@@ -107,4 +107,72 @@ namespace CMEngine {
             static_cast<float>(screenWidth) / static_cast<float>(screenHeight),
             nearPlane, farPlane);
     }
+
+    std::string Camera::Serialize() const {
+        std::ostringstream oss;
+        oss << position.x << " " << position.y << " " << position.z << " "
+            << front.x << " " << front.y << " " << front.z << " "
+            << up.x << " " << up.y << " " << up.z << " "
+            << yaw << " " << pitch;
+        return oss.str();
+    }
+
+    void Camera::Deserialize(const std::string& data) {
+        std::istringstream iss(data);
+        iss >> position.x >> position.y >> position.z
+            >> front.x >> front.y >> front.z
+            >> up.x >> up.y >> up.z
+            >> yaw >> pitch;
+        UpdateViewMatrix();
+    }
+
+    void Camera::SaveCurrentState() {
+        cameraStates.push_back(Serialize());
+        SaveStatesToFile("camera_states.txt");
+    }
+
+    void Camera::LoadState(int index) {
+        if (index >= 0 && index < cameraStates.size()) {
+            Deserialize(cameraStates[index]);
+        }
+    }
+
+    void Camera::DeleteState(int index) {
+        if (index >= 0 && index < cameraStates.size()) {
+            cameraStates.erase(cameraStates.begin() + index);
+        }
+    }
+
+    const std::vector<std::string>& Camera::GetStates() const {
+        return cameraStates;
+    }
+
+    void Camera::SaveStatesToFile(const std::string& filename) {
+        std::ofstream file(filename);
+        if (file.is_open()) {
+            for (const auto& state : cameraStates) {
+                file << state << "\n";
+            }
+            file.close();
+        }
+        else {
+            std::cerr << "Unable to open file for writing: " << filename << "\n";
+        }
+    }
+
+    void Camera::LoadStatesFromFile(const std::string& filename) {
+        std::ifstream file(filename);
+        if (file.is_open()) {
+            cameraStates.clear();
+            std::string line;
+            while (std::getline(file, line)) {
+                cameraStates.push_back(line);
+            }
+            file.close();
+        }
+        else {
+            std::cerr << "Unable to open file for reading: " << filename << "\n";
+        }
+    }
+
 }

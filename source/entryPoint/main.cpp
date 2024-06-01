@@ -73,7 +73,7 @@ MessageCallback(GLenum source,
 }
 
 glm::vec3 cubePositionMoving(0.0f, 0.0f, 0.0f);
-float cubeSpeed = 2.0f; // Speed of the cube's movement
+float cubeSpeed = 0.0f; // Speed of the cube's movement
 bool movingRight = true;
 
 void UpdateCubePosition(float deltaTime) {
@@ -130,6 +130,7 @@ int main(int argc, char* argv[]) {
 
 	// Creates camera object
 	std::shared_ptr<Camera> camera = std::make_unique<Camera>(ScreenWidth, ScreenHeight);
+	camera->LoadStatesFromFile("camera_states.txt");
 
 	glm::vec3 cubePositions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f),
@@ -145,7 +146,7 @@ int main(int argc, char* argv[]) {
 	};
 
 	glm::vec3 pointLightPositions[] = {
-	glm::vec3(0.7f,  0.2f,  2.0f),
+	glm::vec3(-1.0f,  5.0f,  6.5f),
 	glm::vec3(2.3f, -3.3f, -4.0f),
 	glm::vec3(-4.0f,  2.0f, -12.0f),
 	glm::vec3(0.0f,  0.0f, -3.0f)
@@ -322,6 +323,7 @@ int main(int argc, char* argv[]) {
 	glm::vec3 Ambient = glm::vec3(0.5f, 0.5f, 0.5f);
 	glm::vec3 Diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
 	glm::vec3 Specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	int shadowMethod = 0;
 
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -353,7 +355,6 @@ int main(int argc, char* argv[]) {
 
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
 				1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			//ImGui::Image((void*)(intptr_t)depthMap, ImVec2(ScreenWidth/4, ScreenHeight/4));
 			ImGui::End();
 
 			// New floating panel for point lights
@@ -365,6 +366,7 @@ int main(int argc, char* argv[]) {
 				ImGui::Separator();
 				ImGui::Text("%s", labelPrefix.c_str());
 
+				ImGui::SliderFloat((labelPrefix + " Move Speed").c_str(), &cubeSpeed, 0.0f, 10.0f);
 				ImGui::SliderFloat3((labelPrefix + " Position").c_str(), glm::value_ptr(lightCubePosition), -10.0f, 10.0f);
 				ImGui::SliderFloat((labelPrefix + " Constant").c_str(), &Constant, 0.0f, 1.0f);
 				ImGui::SliderFloat((labelPrefix + " Linear").c_str(), &Linear, 0.0f, 1.0f);
@@ -374,8 +376,38 @@ int main(int argc, char* argv[]) {
 				ImGui::ColorEdit3((labelPrefix + " Specular").c_str(), glm::value_ptr(Specular));
 				ImGui::SliderFloat((labelPrefix + " Far Plane").c_str(), &FarPlane, 0.0f, 1000.0f);
 			}
+
+			const char* shadowMethods[] = { "ShadowCalculation with PCF", "ShadowCalculationNoPCF", "No Shadows" };
+			ImGui::Combo("Shadow Method", &shadowMethod, shadowMethods, IM_ARRAYSIZE(shadowMethods));
+			modelShader.UploadUniformInt("shadowCalculationMethod", shadowMethod);
+
 			ImGui::End();
 
+
+			ImGui::Begin("Camera Control");
+			if (ImGui::Button("Save Current State")) {
+				camera->SaveCurrentState();
+			}
+
+			static int selectedIndex = -1;
+			const auto& states = camera->GetStates();
+			std::vector<const char*> stateLabels;
+			stateLabels.reserve(states.size());
+			for (size_t i = 0; i < states.size(); ++i) {
+				stateLabels.push_back(std::to_string(i).c_str());
+			}
+
+			ImGui::ListBox("Saved States", &selectedIndex, stateLabels.data(), static_cast<int>(states.size()));
+
+			if (ImGui::Button("Load Selected State") && selectedIndex >= 0 && selectedIndex < states.size()) {
+				camera->LoadState(selectedIndex);
+			}
+
+			if (ImGui::Button("Delete Selected State") && selectedIndex >= 0 && selectedIndex < states.size()) {
+				camera->DeleteState(selectedIndex);
+				selectedIndex = -1;  // Reset the selected index
+			}
+			ImGui::End();
 		}
 
 		renderer.Clear();
@@ -629,6 +661,8 @@ int main(int argc, char* argv[]) {
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
+
+	camera->SaveStatesToFile("camera_states.txt");
 
 	// Cleanup
 	ImGui_ImplOpenGL3_Shutdown();
