@@ -3,8 +3,32 @@
 #include <SDL.h>
 #include <GL/glew.h>
 #include "Camera.h"
+#include <QWidget>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QVBoxLayout>
+
+
+
 
 namespace CMEngine {
+    class MyWidget : public QWidget {
+        Q_OBJECT
+
+    public:
+        explicit MyWidget(QWidget* parent = nullptr);
+
+    signals:
+        void sendDataToEngine(const QString& data);
+
+    private slots:
+        void onButtonClicked();
+
+    private:
+        QLineEdit* inputField;
+        QPushButton* sendButton;
+    };
+
     class Window {
     public:
         Window(int width, int height, const char* title);

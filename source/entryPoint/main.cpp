@@ -4,6 +4,12 @@
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
 
+#include <QApplication>
+#include <QWidget>
+#include <QPushButton>
+//#include <QGridLayout>
+//#include <QVBoxLayout>
+
 #include <graphics/Window.h>
 #include <graphics/Shader.h>
 #include <graphics/Renderer.h>
@@ -63,9 +69,9 @@ MessageCallback(GLenum source,
 	const GLchar* message,
 	const void* userParam)
 {
-	fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
-		type, severity, message);
+	//fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+	//	(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+	//	type, severity, message);
 	if (type == GL_DEBUG_TYPE_ERROR)
 	{
 		int a = 0;
@@ -92,10 +98,33 @@ void UpdateCubePosition(float deltaTime) {
 		}
 	}
 }
+
+void handleInputData(const QString& data) {
+	// Process the data and update the game engine accordingly
+	//qDebug() << "Data received from Qt widget:" << data;
+	// Example: Update some parameter in the game engine
+	// engine.updateParameter(data.toStdString());
+	fprintf(stderr, "Data received from Qt widget: %s \n", data.toStdString().c_str());
+
+}
+
 int main(int argc, char* argv[]) {
 	using namespace CMEngine;
 
-	VirtualFileSystem::GetInstance().Init("../../../../Assets/");
+	VirtualFileSystem::GetInstance().Init("Assets/");
+
+	QApplication app(argc, argv); // Basics of QT, start an application
+	// Create a simple Qt widget
+	MyWidget myWidget;
+	myWidget.resize(320, 240);
+	myWidget.setWindowTitle("Qt Widget Example");
+
+	// Connect the signal to the slot/function
+	QObject::connect(&myWidget, &MyWidget::sendDataToEngine, &handleInputData);
+
+	// Show the Qt widget
+	myWidget.show();
+
 
 	Window window(ScreenWidth, ScreenHeight, "Master's Degree Showcase (CMEngine)");
 
@@ -324,6 +353,8 @@ int main(int argc, char* argv[]) {
 	glm::vec3 Diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
 	glm::vec3 Specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	int shadowMethod = 0;
+	glm::vec3 model_scale = glm::vec3(0.02f, 0.02f, 0.02f);
+	//glm::vec3 model_scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -333,6 +364,9 @@ int main(int argc, char* argv[]) {
 	Renderer renderer;
 
 	while (!window.IsClosed()) {
+
+		app.processEvents();
+
 		Uint32 currentTime = SDL_GetTicks();
 		float deltaTime = (currentTime - lastTime) / 1000.0f; // Convert milliseconds to seconds.
 		lastTime = currentTime;
@@ -466,7 +500,7 @@ int main(int argc, char* argv[]) {
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePosition); // translate it down so it's at the center of the scene
 			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
-			model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
+			model = glm::scale(model, model_scale);	// it's a bit too big for our scene, so scale it down
 			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
 			glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
@@ -520,7 +554,7 @@ int main(int argc, char* argv[]) {
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePosition); // translate it down so it's at the center of the scene
 			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // No rotation
-			model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));	// it's a bit too big for our scene, so scale it down
+			model = glm::scale(model, model_scale);	// it's a bit too big for our scene, so scale it down
 			angleInDegrees += rotationSpeed * deltaTime; // Update rotation angle.
 			glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, glm::radians(angleInDegrees), rotationAxis);
@@ -669,7 +703,11 @@ int main(int argc, char* argv[]) {
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
 
-	return 0;
+	int RetVal = app.exec();	// Most examples have this on the return, we
+
+
+	return RetVal;
+	//return 0;
 }
 
 void renderScene(CMEngine::Shader& shader) {

@@ -4,6 +4,25 @@
 #include "backends/imgui_impl_opengl3.h"
 
 namespace CMEngine {
+
+    MyWidget::MyWidget(QWidget* parent) : QWidget(parent) {
+        QVBoxLayout* layout = new QVBoxLayout(this);
+
+        inputField = new QLineEdit(this);
+        sendButton = new QPushButton("Send to Engine", this);
+
+        layout->addWidget(inputField);
+        layout->addWidget(sendButton);
+
+        setLayout(layout);
+
+        connect(sendButton, &QPushButton::clicked, this, &MyWidget::onButtonClicked);
+    }
+
+    void MyWidget::onButtonClicked() {
+        emit sendDataToEngine(inputField->text());
+    }
+
     Window::Window(int width, int height, const char* title)
         : m_isClosed(false)
     {
