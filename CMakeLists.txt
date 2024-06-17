@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-set(QT_ROOT_DIR         "qt-5.15.3-dynamic-msvc2019-x86_64")
+set(QT_ROOT_DIR         "qt-5.15.3-static-msvc2019-x86_64")
 set(QT_DIR              "${QT_ROOT_DIR}/lib/cmake/Qt5")
 set(Qt5_DIR             "${QT_ROOT_DIR}/lib/cmake/Qt5")
 set(QT_QMAKE_EXECUTABLE "${QT_ROOT_DIR}/bin/qmake.exe")
@@ -107,6 +107,7 @@ ${ENGINE_SOURCE}
 
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+add_compile_definitions(QT_STATIC)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 target_include_directories(${PROJECT_NAME} 
@@ -149,15 +150,7 @@ target_precompile_headers( ${PROJECT_NAME} PUBLIC source/common.h)
 
 # Copy necessary DLLs after build
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${QT_ROOT_DIR}/bin/Qt5Widgetsd.dll"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${QT_ROOT_DIR}/bin/Qt5Guid.dll"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${QT_ROOT_DIR}/bin/Qt5Cored.dll"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+
 
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${EXTERNALS_PATH}/assimpdll/lib/assimp-vc143-mt.dll"
