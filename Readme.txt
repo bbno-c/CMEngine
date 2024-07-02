@@ -1,1 +1,1 @@
-Cross-platform Modular Engine
+Cross-platform Modular 3D Graphics Engine
